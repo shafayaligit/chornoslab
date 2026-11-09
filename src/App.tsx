@@ -1564,6 +1564,27 @@ export const App: React.FC = () => {
                       </span>
                     )}
 
+                  {windowConfig.isGhostMode && (
+                    <button
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleGhostMode();
+                      }}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (windowConfig.isGhostMode) {
+                          toggleGhostMode();
+                        }
+                      }}
+                      className="pointer-events-auto p-1.5 rounded-full bg-amber-500/35 border border-amber-400 text-amber-200 flex items-center justify-center hover:bg-amber-500/55 shadow-md cursor-pointer shrink-0 transition-transform hover:scale-110 animate-pulse my-0.5"
+                      title="Ghost Mode Active: Click to Un-Ghost (or press Ctrl+Shift+G)"
+                    >
+                      <Ghost className="w-3.5 h-3.5 text-amber-300" />
+                    </button>
+                  )}
+
                   <div
                     className={`w-3 h-[1px] shrink-0 ${
                       currentVisualTheme.mode === 'light'
@@ -1689,11 +1710,10 @@ export const App: React.FC = () => {
                           toggleGhostMode();
                         }
                       }}
-                      className="pointer-events-auto px-2.5 py-1 rounded-full bg-amber-500/35 border border-amber-400 text-amber-200 text-[11px] font-extrabold flex items-center gap-1.5 hover:bg-amber-500/55 shadow-md cursor-pointer"
-                      title="Click to Un-Ghost (or press Ctrl+Shift+G)"
+                      className="pointer-events-auto p-1.5 rounded-full bg-amber-500/35 border border-amber-400 text-amber-200 flex items-center justify-center hover:bg-amber-500/55 shadow-md cursor-pointer shrink-0 transition-transform hover:scale-110 animate-pulse"
+                      title="Ghost Mode Active: Click to Un-Ghost (or press Ctrl+Shift+G)"
                     >
                       <Ghost className="w-3.5 h-3.5 text-amber-300" />
-                      <span>Un-Ghost</span>
                     </button>
                   )}
 
