@@ -17,6 +17,8 @@ import {
 } from './types/hud';
 import {
   centerNativeWindowTop,
+  checkForAppUpdates,
+  UpdateInfo,
   isRunningInTauri,
   loadPersistedHudState,
   savePersistedHudState,
@@ -68,6 +70,11 @@ export const App: React.FC = () => {
   const [quickAddMode, setQuickAddMode] = useState<QuickAddMode>('task');
   const [isCheckInActive, setIsCheckInActive] = useState(false);
   const hoverTimeoutRef = useRef<number | null>(null);
+
+  // Over-the-air update state
+  const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [updateProgress, setUpdateProgress] = useState(0);
 
   // Dragging state when undocked in Free Move mode
   const dragRef = useRef<{
@@ -207,8 +214,29 @@ export const App: React.FC = () => {
       }
       soundFx.enabled = loaded.windowConfig.soundEnabled;
       setIsLoaded(true);
+
+      // Check for OTA updates in background (runs shortly after initial load)
+      setTimeout(() => {
+        checkForAppUpdates().then((info) => {
+          if (info.available) {
+            setUpdateInfo(info);
+          }
+        });
+      }, 3000);
     });
   }, []);
+
+  const handleApplyUpdate = async () => {
+    if (!updateInfo?.downloadAndInstall || isUpdating) return;
+    setIsUpdating(true);
+    setUpdateProgress(10);
+    try {
+      await updateInfo.downloadAndInstall((pct) => setUpdateProgress(pct));
+    } catch (err) {
+      console.error('Update failed:', err);
+      setIsUpdating(false);
+    }
+  };
 
   // Expose global hooks for native OS-level Rust hotkey thread (Ctrl+Shift+G, Alt+T, Alt+B)
   useEffect(() => {
@@ -1857,6 +1885,26 @@ export const App: React.FC = () => {
                       onFinishEarly={finishActiveBlockEarly}
                       onChangeInterval={handleChangeCheckInInterval}
                     />
+                  )}
+
+                  {updateInfo?.available && (
+                    <div className="mb-2.5 p-2.5 rounded-2xl bg-gradient-to-r from-blue-600/40 to-indigo-600/40 border border-blue-400/50 shadow-lg flex items-center justify-between text-xs text-white backdrop-blur-md">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                        <span>
+                          <strong>v{updateInfo.version}</strong> ready to install
+                        </span>
+                      </div>
+                      <button
+                        onClick={handleApplyUpdate}
+                        disabled={isUpdating}
+                        className="px-3 py-1 rounded-xl bg-blue-500 hover:bg-blue-400 active:scale-95 text-white font-bold transition-all shadow-md"
+                      >
+                        {isUpdating
+                          ? `Updating ${updateProgress > 0 ? updateProgress + '%' : '...'}`
+                          : 'Update Now'}
+                      </button>
+                    </div>
                   )}
 
                   <AmbientClockHud

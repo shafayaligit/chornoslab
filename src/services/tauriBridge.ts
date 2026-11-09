@@ -152,13 +152,15 @@ export async function syncNativeWindowBounds(
 export interface UpdateInfo {
   available: boolean;
   version?: string;
+  currentVersion?: string;
   body?: string;
-  downloadAndInstall?: () => Promise<void>;
+  downloadAndInstall?: (onProgress?: (progress: number) => void) => Promise<void>;
+  error?: string;
 }
 
 export async function checkForAppUpdates(): Promise<UpdateInfo> {
   if (!isRunningInTauri()) {
-    return { available: false };
+    return { available: false, error: 'Not running inside desktop app' };
   }
   try {
     const { check } = await import('@tauri-apps/plugin-updater');
@@ -167,14 +169,35 @@ export async function checkForAppUpdates(): Promise<UpdateInfo> {
       return {
         available: true,
         version: update.version,
+        currentVersion: update.currentVersion,
         body: update.body,
-        downloadAndInstall: async () => {
-          await update.downloadAndInstall();
+        downloadAndInstall: async (onProgress) => {
+          let downloaded = 0;
+          let contentLength = 0;
+          await update.downloadAndInstall((event) => {
+            if (event.event === 'Started') {
+              contentLength = event.data.contentLength || 0;
+            } else if (event.event === 'Progress') {
+              downloaded += event.data.chunkLength;
+              if (contentLength > 0 && onProgress) {
+                onProgress(Math.round((downloaded / contentLength) * 100));
+              }
+            } else if (event.event === 'Finished') {
+              if (onProgress) onProgress(100);
+            }
+          });
+          try {
+            const { relaunch } = await import('@tauri-apps/plugin-process');
+            await relaunch();
+          } catch {
+            // Relaunch might fail if process plugin permissions aren't initialized, NSIS handles restarting
+          }
         },
       };
     }
-  } catch (err) {
+  } catch (err: any) {
     console.debug('[Tauri Updater] Check skipped or offline:', err);
+    return { available: false, error: err?.message || String(err) };
   }
   return { available: false };
 }
