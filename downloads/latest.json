@@ -1,0 +1,11 @@
+﻿{
+    "version":  "0.1.2",
+    "notes":  "ChronoSlab 3D HUD v0.1.2 OTA Update: 100% transparent desktop background, vertical \u0026 horizontal icon-only ghost mode un-ghost button, and OTA auto-updates.",
+    "pub_date":  "2026-11-09T12:28:27Z",
+    "platforms":  {
+                      "windows-x86_64":  {
+                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSWVMxTjRHd2V5K2xLUVNGT3lwbW5URnFLTkZ4QkZVTmRWTGRXc0RiZ3VBSW1Fc01SMmZRczRFK0c5RTBnV3RPQkxXWTYyUXB4NFcyYjh3K3E3cHZlTlVCakRhRUMvQndNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk0MjEyODE1CWZpbGU6Q2hyb25vU2xhYiAzRCBIVURfMC4xLjJfeDY0LXNldHVwLmV4ZQpEUUp1bGNjYjY4RzV3dlJvaGwyYXlTcUluRmpiNnhQR2hvQllQWit5U1VwbWFWUzdFUERCWDR2czRYT2cwS0NaM2VtMmJsUXVQdVh1UDlBa1BsT1ZBZz09Cg==",
+                                             "url":  "https://github.com/shafayaligit/chornoslab/releases/download/v0.1.2/ChronoSlab.3D.HUD_0.1.2_x64-setup.exe"
+                                         }
+                  }
+}
