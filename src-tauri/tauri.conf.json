@@ -52,7 +52,7 @@
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEZBQjIwNzFCNzg1MzRCNTgKUldSWVMxTjRHd2V5K3FEZkVWVnY1c21ZUDJmeXdDVnhoSEF2Mm01MkNMRUFyczRXU1c2UzZlTlEK",
       "endpoints": [
-        "https://github.com/{{owner}}/{{repo}}/releases/latest/download/latest.json"
+        "https://github.com/shafayaligit/chornoslab/releases/latest/download/latest.json"
       ]
     }
   }
