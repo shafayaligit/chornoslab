@@ -168,24 +168,50 @@ fn position_window_at_edge(
 
         let (mut x, mut y) = match edge {
             "bottom" => {
-                let x_pos = screen_pos.x + ((mon_w - w) as f64 * ratio) as i32;
+                let x_pos = if ratio <= 0.15 {
+                    screen_pos.x
+                } else if ratio >= 0.85 {
+                    screen_pos.x + mon_w - w
+                } else {
+                    screen_pos.x + ((mon_w - w) as f64 * ratio) as i32
+                };
                 // Position directly above the Windows taskbar with a clean 4px clearance
                 let y_pos = screen_pos.y + mon_h - h - taskbar_h - 4;
                 (x_pos, y_pos)
             }
             "left" => {
                 let x_pos = screen_pos.x;
-                let y_pos = screen_pos.y + ((mon_h - h) as f64 * ratio) as i32;
+                let available_h = mon_h - h - taskbar_h - 4;
+                let y_pos = if ratio <= 0.15 {
+                    screen_pos.y
+                } else if ratio >= 0.85 {
+                    screen_pos.y + available_h
+                } else {
+                    screen_pos.y + (available_h as f64 * ratio) as i32
+                };
                 (x_pos, y_pos)
             }
             "right" => {
                 let x_pos = screen_pos.x + mon_w - w;
-                let y_pos = screen_pos.y + ((mon_h - h) as f64 * ratio) as i32;
+                let available_h = mon_h - h - taskbar_h - 4;
+                let y_pos = if ratio <= 0.15 {
+                    screen_pos.y
+                } else if ratio >= 0.85 {
+                    screen_pos.y + available_h
+                } else {
+                    screen_pos.y + (available_h as f64 * ratio) as i32
+                };
                 (x_pos, y_pos)
             }
             _ => {
                 // "top" (default)
-                let x_pos = screen_pos.x + ((mon_w - w) as f64 * ratio) as i32;
+                let x_pos = if ratio <= 0.15 {
+                    screen_pos.x
+                } else if ratio >= 0.85 {
+                    screen_pos.x + mon_w - w
+                } else {
+                    screen_pos.x + ((mon_w - w) as f64 * ratio) as i32
+                };
                 let y_pos = screen_pos.y;
                 (x_pos, y_pos)
             }

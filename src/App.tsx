@@ -392,7 +392,25 @@ export const App: React.FC = () => {
         } else {
           ratio = coordY / totalH;
         }
-        ratio = Math.max(0.08, Math.min(0.92, ratio));
+
+        // Magnetic corner snapping: when within 110px of screen corners, snap flush (0.0 or 1.0)
+        if (targetEdge === 'top' || targetEdge === 'bottom') {
+          if (coordX < 110) {
+            ratio = 0.0;
+          } else if (totalW - coordX < 110) {
+            ratio = 1.0;
+          } else {
+            ratio = Math.max(0.0, Math.min(1.0, ratio));
+          }
+        } else {
+          if (coordY < 110) {
+            ratio = 0.0;
+          } else if (totalH - coordY < 110) {
+            ratio = 1.0;
+          } else {
+            ratio = Math.max(0.0, Math.min(1.0, ratio));
+          }
+        }
 
         railDragEdgeRef.current = targetEdge;
         railDragRatioRef.current = ratio;
@@ -678,7 +696,7 @@ export const App: React.FC = () => {
       windowConfig: {
         ...prev.windowConfig,
         dockMode: 'notch',
-        dockOffsetRatio: Math.max(0.08, Math.min(0.92, ratio)),
+        dockOffsetRatio: Math.max(0.0, Math.min(1.0, ratio)),
       },
     }));
   };
@@ -1356,8 +1374,24 @@ export const App: React.FC = () => {
   const currentDockEdge: ScreenEdge = hudState.windowConfig.dockEdge || 'top';
   const currentDockOffsetRatio: number =
     hudState.windowConfig.dockOffsetRatio ?? 0.5;
-  const isCornerStart: boolean =
-    !isFloatingMode && currentDockOffsetRatio < 0.28;
+  const isLeftCorner: boolean =
+    !isFloatingMode &&
+    (currentDockEdge === 'top' || currentDockEdge === 'bottom') &&
+    currentDockOffsetRatio <= 0.15;
+  const isRightCorner: boolean =
+    !isFloatingMode &&
+    (currentDockEdge === 'top' || currentDockEdge === 'bottom') &&
+    currentDockOffsetRatio >= 0.85;
+  const isTopCorner: boolean =
+    !isFloatingMode &&
+    (currentDockEdge === 'left' || currentDockEdge === 'right') &&
+    currentDockOffsetRatio <= 0.15;
+  const isBottomCorner: boolean =
+    !isFloatingMode &&
+    (currentDockEdge === 'left' || currentDockEdge === 'right') &&
+    currentDockOffsetRatio >= 0.85;
+
+  const isCornerStart: boolean = isLeftCorner || isTopCorner;
   const isVerticalEdge =
     !isFloatingMode &&
     (currentDockEdge === 'left' || currentDockEdge === 'right');
@@ -1422,23 +1456,27 @@ export const App: React.FC = () => {
       switch (currentDockEdge) {
         case 'bottom':
           return {
-            left: `clamp(12px, calc(${pct}vw - ${halfW}px), calc(100vw - ${approxW + 12}px))`,
+            left: isLeftCorner ? 0 : isRightCorner ? undefined : `clamp(0px, calc(${pct}vw - ${halfW}px), calc(100vw - ${approxW}px))`,
+            right: isRightCorner ? 0 : undefined,
             bottom: 52,
           };
         case 'left':
           return {
-            top: `clamp(12px, calc(${pct}vh - ${halfH}px), calc(100vh - ${approxH + 12}px))`,
+            top: isTopCorner ? 0 : isBottomCorner ? undefined : `clamp(0px, calc(${pct}vh - ${halfH}px), calc(100vh - ${approxH + 52}px))`,
+            bottom: isBottomCorner ? 52 : undefined,
             left: 0,
           };
         case 'right':
           return {
-            top: `clamp(12px, calc(${pct}vh - ${halfH}px), calc(100vh - ${approxH + 12}px))`,
+            top: isTopCorner ? 0 : isBottomCorner ? undefined : `clamp(0px, calc(${pct}vh - ${halfH}px), calc(100vh - ${approxH + 52}px))`,
+            bottom: isBottomCorner ? 52 : undefined,
             right: 0,
           };
         case 'top':
         default:
           return {
-            left: `clamp(12px, calc(${pct}vw - ${halfW}px), calc(100vw - ${approxW + 12}px))`,
+            left: isLeftCorner ? 0 : isRightCorner ? undefined : `clamp(0px, calc(${pct}vw - ${halfW}px), calc(100vw - ${approxW}px))`,
+            right: isRightCorner ? 0 : undefined,
             top: 0,
           };
       }
@@ -1463,26 +1501,42 @@ export const App: React.FC = () => {
     if (!isRunningInTauri()) {
       switch (currentDockEdge) {
         case 'bottom':
-          return 'fixed bottom-0 z-40 pointer-events-none flex justify-center items-end';
+          return `fixed bottom-0 z-40 pointer-events-none flex ${
+            isLeftCorner ? 'justify-start' : isRightCorner ? 'justify-end' : 'justify-center'
+          } items-end`;
         case 'left':
-          return 'fixed left-0 z-40 pointer-events-none flex items-center justify-start';
+          return `fixed left-0 z-40 pointer-events-none flex ${
+            isTopCorner ? 'items-start' : isBottomCorner ? 'items-end' : 'items-center'
+          } justify-start`;
         case 'right':
-          return 'fixed right-0 z-40 pointer-events-none flex items-center justify-end';
+          return `fixed right-0 z-40 pointer-events-none flex ${
+            isTopCorner ? 'items-start' : isBottomCorner ? 'items-end' : 'items-center'
+          } justify-end`;
         case 'top':
         default:
-          return 'fixed top-0 z-40 pointer-events-none flex justify-center items-start';
+          return `fixed top-0 z-40 pointer-events-none flex ${
+            isLeftCorner ? 'justify-start' : isRightCorner ? 'justify-end' : 'justify-center'
+          } items-start`;
       }
     }
     switch (currentDockEdge) {
       case 'bottom':
-        return 'fixed bottom-0 inset-x-0 z-40 pointer-events-none flex justify-center items-end';
+        return `fixed bottom-0 inset-x-0 z-40 pointer-events-none flex ${
+          isLeftCorner ? 'justify-start' : isRightCorner ? 'justify-end' : 'justify-center'
+        } items-end`;
       case 'left':
-        return 'fixed inset-y-0 left-0 z-40 pointer-events-none flex items-center justify-start';
+        return `fixed inset-y-0 left-0 z-40 pointer-events-none flex ${
+          isTopCorner ? 'items-start' : isBottomCorner ? 'items-end' : 'items-center'
+        } justify-start`;
       case 'right':
-        return 'fixed inset-y-0 right-0 z-40 pointer-events-none flex items-center justify-end';
+        return `fixed inset-y-0 right-0 z-40 pointer-events-none flex ${
+          isTopCorner ? 'items-start' : isBottomCorner ? 'items-end' : 'items-center'
+        } justify-end`;
       case 'top':
       default:
-        return 'fixed top-0 inset-x-0 z-40 pointer-events-none flex justify-center items-start';
+        return `fixed top-0 inset-x-0 z-40 pointer-events-none flex ${
+          isLeftCorner ? 'justify-start' : isRightCorner ? 'justify-end' : 'justify-center'
+        } items-start`;
     }
   };
 
@@ -1527,12 +1581,16 @@ export const App: React.FC = () => {
                 }}
                 className={`${
                   currentDockEdge === 'left'
-                    ? 'notch-shell rounded-r-[24px] border-r-2'
-                    : 'notch-shell rounded-l-[24px] border-l-2'
+                    ? `notch-shell rounded-r-[24px] ${
+                        isTopCorner ? 'rounded-tl-none' : isBottomCorner ? 'rounded-bl-none' : ''
+                      } border-r-2`
+                    : `notch-shell rounded-l-[24px] ${
+                        isTopCorner ? 'rounded-tr-none' : isBottomCorner ? 'rounded-br-none' : ''
+                      } border-l-2`
                 } animate-soft-panel flex flex-col items-center justify-between py-4 px-1.5 h-[310px] w-[38px] cursor-pointer group`}
               >
-                {/* Drag Handle at top (shifts to bottom if near corner) */}
-                {!isCornerStart && (
+                {/* Drag Handle at top (shifts to bottom if near top corner) */}
+                {!isTopCorner && (
                   <div
                     className="flex items-center justify-center p-1 rounded-lg text-slate-400 hover:text-white cursor-grab active:cursor-grabbing shrink-0"
                     title="Drag along border or snap to any screen edge"
@@ -1652,7 +1710,7 @@ export const App: React.FC = () => {
                       }`}
                     />
                   )}
-                  {isCornerStart && (
+                  {isTopCorner && (
                     <div
                       className="flex items-center justify-center p-1 rounded-lg text-slate-400 hover:text-white cursor-grab active:cursor-grabbing shrink-0 mt-0.5"
                       title="Drag along border or snap to any screen edge"
@@ -1683,13 +1741,25 @@ export const App: React.FC = () => {
                   isFloatingMode
                     ? 'clay-slab rounded-[22px] mt-1.5 px-3.5 py-2 cursor-grab active:cursor-grabbing border-b-2'
                     : currentDockEdge === 'bottom'
-                    ? 'notch-shell rounded-[22px] mb-1.5 px-4 py-2 cursor-pointer border-t-2'
-                    : 'notch-shell rounded-b-[24px] px-4 py-2 cursor-pointer border-b-2'
+                    ? `notch-shell ${
+                        isLeftCorner
+                          ? 'rounded-tr-[24px] rounded-tl-none rounded-bl-none rounded-br-[24px]'
+                          : isRightCorner
+                          ? 'rounded-tl-[24px] rounded-tr-none rounded-br-none rounded-bl-[24px]'
+                          : 'rounded-[22px]'
+                      } mb-1.5 px-4 py-2 cursor-pointer border-t-2`
+                    : `notch-shell ${
+                        isLeftCorner
+                          ? 'rounded-br-[24px] rounded-bl-none rounded-tl-none rounded-tr-[24px]'
+                          : isRightCorner
+                          ? 'rounded-bl-[24px] rounded-br-none rounded-tr-none rounded-tl-[24px]'
+                          : 'rounded-b-[24px]'
+                      } px-4 py-2 cursor-pointer border-b-2`
                 } animate-soft-panel flex items-center justify-between gap-3.5 min-w-[310px] max-w-[460px] group`}
               >
-                {/* Left: Drag Handle (shifts to right if in corner) + Current State Pill */}
+                {/* Left: Drag Handle (shifts to right if in left corner) + Current State Pill */}
                 <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
-                  {!isCornerStart && (
+                  {!isLeftCorner && (
                     <div
                       className="p-1 -ml-1 text-slate-400 hover:text-white cursor-grab active:cursor-grabbing shrink-0"
                       title="Drag along border or snap to any screen edge"
@@ -1805,7 +1875,7 @@ export const App: React.FC = () => {
                     />
                   )}
 
-                  {isCornerStart && (
+                  {isLeftCorner && (
                     <div
                       className="p-1 -mr-1 text-slate-400 hover:text-white cursor-grab active:cursor-grabbing shrink-0 ml-0.5"
                       title="Drag along border or snap to any screen edge"
@@ -1825,12 +1895,28 @@ export const App: React.FC = () => {
                 isFloatingMode
                   ? 'clay-slab rounded-[28px] p-4'
                   : currentDockEdge === 'bottom'
-                  ? 'notch-shell rounded-t-[32px] rounded-b-[20px] mb-1.5 p-4'
+                  ? `notch-shell ${
+                      isLeftCorner
+                        ? 'rounded-tr-[32px] rounded-tl-none rounded-bl-none rounded-br-[20px]'
+                        : isRightCorner
+                        ? 'rounded-tl-[32px] rounded-tr-none rounded-br-none rounded-bl-[20px]'
+                        : 'rounded-t-[32px] rounded-b-[20px]'
+                    } mb-1.5 p-4`
                   : currentDockEdge === 'left'
-                  ? 'notch-shell rounded-r-[32px] p-4'
+                  ? `notch-shell rounded-r-[32px] ${
+                      isTopCorner ? 'rounded-tl-none' : isBottomCorner ? 'rounded-bl-none' : ''
+                    } p-4`
                   : currentDockEdge === 'right'
-                  ? 'notch-shell rounded-l-[32px] p-4'
-                  : 'notch-shell rounded-b-[32px] p-4'
+                  ? `notch-shell rounded-l-[32px] ${
+                      isTopCorner ? 'rounded-tr-none' : isBottomCorner ? 'rounded-br-none' : ''
+                    } p-4`
+                  : `notch-shell ${
+                      isLeftCorner
+                        ? 'rounded-br-[32px] rounded-bl-none rounded-tl-none rounded-tr-none'
+                        : isRightCorner
+                        ? 'rounded-bl-[32px] rounded-br-none rounded-tr-none rounded-tl-none'
+                        : 'rounded-b-[32px]'
+                    } p-4`
               } animate-soft-panel flex flex-col gap-3 max-h-[calc(100vh-16px)] overflow-y-auto ${
                 !hasCompletedOnboarding
                   ? 'w-[92vw] max-w-[370px]'
