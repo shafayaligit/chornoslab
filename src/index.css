@@ -1,0 +1,719 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    user-select: none;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    overflow: hidden;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+/* Dynamic Notch Surface */
+.notch-shell {
+  background: linear-gradient(
+    165deg,
+    rgba(16, 19, 28, 0.96) 0%,
+    rgba(9, 11, 17, 0.98) 100%
+  );
+  backdrop-filter: blur(26px) saturate(160%);
+  -webkit-backdrop-filter: blur(26px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: none;
+  box-shadow:
+    0 10px 24px -4px rgba(0, 0, 0, 0.45),
+    0 4px 10px -2px rgba(0, 0, 0, 0.3),
+    inset 0 -1.5px 1.5px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -3px 6px 0 rgba(0, 0, 0, 0.55);
+  transition:
+    width 0.52s cubic-bezier(0.22, 1, 0.36, 1),
+    max-width 0.52s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Custom Claymorphic & 3D Surface Utilities */
+.clay-slab {
+  background: linear-gradient(
+    145deg,
+    rgba(28, 34, 48, 0.92) 0%,
+    rgba(17, 21, 31, 0.96) 100%
+  );
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  box-shadow:
+    0 12px 26px -6px rgba(0, 0, 0, 0.48),
+    0 4px 12px -2px rgba(0, 0, 0, 0.32),
+    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -3px 6px 0 rgba(0, 0, 0, 0.5);
+  transition:
+    width 0.52s cubic-bezier(0.22, 1, 0.36, 1),
+    max-width 0.52s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.clay-card {
+  background: linear-gradient(
+    150deg,
+    rgba(35, 43, 60, 0.78) 0%,
+    rgba(22, 27, 39, 0.86) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow:
+    0 10px 22px -6px rgba(0, 0, 0, 0.6),
+    0 4px 10px -3px rgba(0, 0, 0, 0.4),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -2.5px 4px 0 rgba(0, 0, 0, 0.45);
+  transition:
+    transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+    height 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    min-height 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    max-height 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.clay-card-interactive:hover {
+  transform: translateY(-1.5px);
+  border-color: rgba(255, 255, 255, 0.17);
+  box-shadow:
+    0 16px 28px -6px rgba(0, 0, 0, 0.68),
+    0 6px 14px -3px rgba(0, 0, 0, 0.45),
+    inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -3px 5px 0 rgba(0, 0, 0, 0.5);
+}
+
+.clay-well {
+  background: rgba(11, 14, 21, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow:
+    inset 0 3px 8px 0 rgba(0, 0, 0, 0.75),
+    inset 0 1px 2px 0 rgba(0, 0, 0, 0.6),
+    0 1px 0 0 rgba(255, 255, 255, 0.07);
+  transition:
+    background 0.36s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.clay-button {
+  background: linear-gradient(
+    160deg,
+    rgba(44, 53, 74, 0.9) 0%,
+    rgba(27, 33, 47, 0.95) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 6px 12px -2px rgba(0, 0, 0, 0.55),
+    0 2px 4px -1px rgba(0, 0, 0, 0.35),
+    inset 0 1.5px 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -2px 3px 0 rgba(0, 0, 0, 0.5);
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.24s ease;
+}
+
+.clay-button:hover {
+  transform: translateY(-0.5px);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.clay-button:active,
+.clay-button-active {
+  transform: translateY(1px) scale(0.988);
+  box-shadow:
+    0 1px 2px 0 rgba(0, 0, 0, 0.5),
+    inset 0 3px 6px 0 rgba(0, 0, 0, 0.7),
+    inset 0 -1px 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Soft Fluid Accordion & Menu Entrance Utilities */
+.soft-collapse {
+  display: grid;
+  transition:
+    grid-template-rows 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.soft-collapse-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.soft-collapse-closed {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transform: translateY(-4px) scale(0.99);
+  pointer-events: none;
+}
+
+@keyframes soft-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes soft-popover-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-soft-panel {
+  animation: soft-fade-in 0.2s ease-out both;
+}
+
+.animate-soft-popover {
+  animation: soft-popover-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: top center;
+}
+
+/* 3D Extruded Clock Text Shadow */
+.clock-3d-text {
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.18),
+    0 2px 0 rgba(15, 23, 42, 0.9),
+    0 4px 8px rgba(0, 0, 0, 0.65),
+    0 10px 24px rgba(167, 139, 250, 0.22);
+}
+
+/* Isometric 3D Perspective Container */
+.hud-perspective-stage {
+  perspective: 1400px;
+}
+
+.hud-isometric-slab {
+  transform-style: preserve-3d;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 0.3s ease,
+              filter 0.3s ease;
+}
+
+.hud-isometric-tilted {
+  transform: rotateX(2.5deg) translateZ(0px);
+}
+
+/* Custom subtle scrollbars inside drawers */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(11, 14, 21, 0.4);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(167, 139, 250, 0.45);
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.75;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* ==========================================
+   VISUAL THEME PALETTES
+   Dark Mode: Neutral, Space, Cats
+   Light Mode: Tulip ('flowers'), Monkeys, Otter
+   ========================================== */
+
+/* 0. NEUTRAL THEME (Dark Mode — Crisp Gunmetal Slate & Electric Cyan-Blue) */
+[data-hud-theme='neutral'] .notch-shell,
+[data-hud-theme='neutral'] .clay-slab {
+  background: linear-gradient(160deg, rgba(24, 32, 48, 0.98) 0%, rgba(15, 21, 33, 0.99) 100%);
+  border-color: rgba(56, 189, 248, 0.28);
+  box-shadow:
+    0 14px 28px -6px rgba(0, 0, 0, 0.65),
+    inset 0 1.5px 1.5px rgba(255, 255, 255, 0.18),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.55);
+}
+[data-hud-theme='neutral'] .clay-card {
+  background: linear-gradient(145deg, rgba(36, 47, 68, 0.94) 0%, rgba(23, 31, 46, 0.95) 100%);
+  border-color: rgba(148, 163, 184, 0.22);
+}
+[data-hud-theme='neutral'] .clay-well {
+  background: rgba(11, 16, 26, 0.85);
+  border-color: rgba(56, 189, 248, 0.14);
+}
+[data-hud-theme='neutral'] .clay-button {
+  background: linear-gradient(160deg, rgba(48, 61, 86, 0.95) 0%, rgba(30, 39, 56, 0.98) 100%);
+  border-color: rgba(148, 163, 184, 0.25);
+}
+
+/* 1. SPACE THEME (Dark Mode — Rich Cosmic Indigo & Nebula Violet) */
+[data-hud-theme='space'] .notch-shell,
+[data-hud-theme='space'] .clay-slab {
+  background: linear-gradient(160deg, rgba(36, 25, 78, 0.98) 0%, rgba(21, 14, 48, 0.99) 100%);
+  border-color: rgba(167, 139, 250, 0.42);
+  box-shadow:
+    0 14px 28px -6px rgba(10, 6, 28, 0.72),
+    inset 0 1.5px 1.5px rgba(216, 180, 254, 0.25),
+    inset 0 -3px 6px rgba(12, 7, 32, 0.65);
+}
+[data-hud-theme='space'] .clay-card {
+  background: linear-gradient(145deg, rgba(52, 36, 108, 0.94) 0%, rgba(33, 22, 72, 0.95) 100%);
+  border-color: rgba(167, 139, 250, 0.32);
+  box-shadow:
+    0 10px 22px -6px rgba(10, 6, 28, 0.65),
+    inset 0 1.5px 1px rgba(216, 180, 254, 0.2);
+}
+[data-hud-theme='space'] .clay-well {
+  background: rgba(17, 11, 40, 0.86);
+  border-color: rgba(139, 92, 246, 0.24);
+  box-shadow:
+    inset 0 3px 8px rgba(6, 3, 18, 0.8),
+    0 1px 0 rgba(196, 181, 253, 0.12);
+}
+[data-hud-theme='space'] .clay-button {
+  background: linear-gradient(160deg, rgba(68, 48, 136, 0.95) 0%, rgba(43, 29, 92, 0.98) 100%);
+  border-color: rgba(167, 139, 250, 0.35);
+  box-shadow:
+    0 6px 12px -2px rgba(10, 6, 28, 0.6),
+    inset 0 1.5px 1px rgba(216, 180, 254, 0.25);
+}
+
+/* 2. CATS THEME (Dark Mode — Rich Warm Mocha Espresso & Caramel Amber) */
+[data-hud-theme='cats'] .notch-shell,
+[data-hud-theme='cats'] .clay-slab {
+  background: linear-gradient(160deg, rgba(62, 38, 26, 0.98) 0%, rgba(38, 22, 15, 0.99) 100%);
+  border-color: rgba(251, 191, 36, 0.42);
+  box-shadow:
+    0 14px 28px -6px rgba(18, 9, 5, 0.72),
+    inset 0 1.5px 1.5px rgba(253, 224, 71, 0.22),
+    inset 0 -3px 6px rgba(20, 10, 6, 0.65);
+}
+[data-hud-theme='cats'] .clay-card {
+  background: linear-gradient(145deg, rgba(84, 52, 36, 0.94) 0%, rgba(54, 32, 22, 0.95) 100%);
+  border-color: rgba(251, 146, 60, 0.34);
+  box-shadow:
+    0 10px 22px -6px rgba(18, 9, 5, 0.65),
+    inset 0 1.5px 1px rgba(254, 215, 170, 0.2);
+}
+[data-hud-theme='cats'] .clay-well {
+  background: rgba(29, 17, 11, 0.86);
+  border-color: rgba(245, 158, 11, 0.24);
+  box-shadow:
+    inset 0 3px 8px rgba(12, 6, 3, 0.8),
+    0 1px 0 rgba(253, 224, 71, 0.12);
+}
+[data-hud-theme='cats'] .clay-button {
+  background: linear-gradient(160deg, rgba(106, 66, 46, 0.95) 0%, rgba(68, 41, 28, 0.98) 100%);
+  border-color: rgba(251, 191, 36, 0.35);
+  box-shadow:
+    0 6px 12px -2px rgba(18, 9, 5, 0.6),
+    inset 0 1.5px 1px rgba(254, 215, 170, 0.24);
+}
+
+/* Dark-Mode Themed Inputs & Selects (Space & Cats) */
+[data-hud-theme='space'] .clay-well input[class*='bg-slate-900'],
+[data-hud-theme='space'] .clay-well select[class*='bg-slate-900'],
+[data-hud-theme='space'] .clay-card input[class*='bg-slate-900'],
+[data-hud-theme='space'] .clay-card select[class*='bg-slate-900'] {
+  background-color: rgba(24, 16, 56, 0.95) !important;
+  border-color: rgba(167, 139, 250, 0.32) !important;
+}
+
+[data-hud-theme='cats'] .clay-well input[class*='bg-slate-900'],
+[data-hud-theme='cats'] .clay-well select[class*='bg-slate-900'],
+[data-hud-theme='cats'] .clay-card input[class*='bg-slate-900'],
+[data-hud-theme='cats'] .clay-card select[class*='bg-slate-900'] {
+  background-color: rgba(42, 24, 16, 0.95) !important;
+  border-color: rgba(251, 191, 36, 0.32) !important;
+}
+
+/* ==========================================
+   LIGHT MODE THEMES (Tulip, Monkeys, Otter)
+   Rich saturated pastel surfaces (Baby Pink / Warm Honey / Sky Mist) + High-contrast dark ink text
+   ========================================== */
+
+/* 3. TULIP THEME ('flowers' — Rich Baby Pink & Rose Quartz) */
+[data-hud-theme='flowers'] .notch-shell,
+[data-hud-theme='flowers'] .clay-slab {
+  background: linear-gradient(160deg, rgba(251, 207, 232, 0.98) 0%, rgba(244, 162, 198, 0.99) 100%);
+  border-color: rgba(219, 39, 119, 0.42);
+  box-shadow:
+    0 14px 28px -6px rgba(131, 24, 67, 0.35),
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.75),
+    inset 0 -2px 4px rgba(157, 23, 77, 0.18);
+}
+[data-hud-theme='flowers'] .clay-card {
+  background: linear-gradient(145deg, rgba(252, 221, 238, 0.96) 0%, rgba(249, 188, 216, 0.95) 100%);
+  border-color: rgba(219, 39, 119, 0.32);
+  box-shadow:
+    0 8px 18px -4px rgba(131, 24, 67, 0.2),
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.8);
+}
+[data-hud-theme='flowers'] .clay-well {
+  background: rgba(238, 165, 200, 0.78);
+  border-color: rgba(190, 24, 93, 0.28);
+  box-shadow:
+    inset 0 2px 6px rgba(131, 24, 67, 0.18),
+    0 1px 0 rgba(255, 255, 255, 0.55);
+}
+[data-hud-theme='flowers'] .clay-button {
+  background: linear-gradient(160deg, rgba(253, 232, 243, 0.96) 0%, rgba(247, 190, 217, 0.98) 100%);
+  border-color: rgba(190, 24, 93, 0.36);
+  box-shadow:
+    0 4px 10px -2px rgba(131, 24, 67, 0.22),
+    inset 0 1px 1px rgba(255, 255, 255, 0.85);
+}
+
+/* 4. MONKEYS THEME (Light Mode — Warm Honey Banana & Golden Peach) */
+[data-hud-theme='monkeys'] .notch-shell,
+[data-hud-theme='monkeys'] .clay-slab {
+  background: linear-gradient(160deg, rgba(253, 230, 138, 0.98) 0%, rgba(252, 203, 98, 0.99) 100%);
+  border-color: rgba(180, 83, 9, 0.42);
+  box-shadow:
+    0 14px 28px -6px rgba(120, 53, 15, 0.35),
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.75),
+    inset 0 -2px 4px rgba(146, 64, 14, 0.18);
+}
+[data-hud-theme='monkeys'] .clay-card {
+  background: linear-gradient(145deg, rgba(254, 238, 170, 0.96) 0%, rgba(253, 218, 128, 0.95) 100%);
+  border-color: rgba(180, 83, 9, 0.32);
+  box-shadow:
+    0 8px 18px -4px rgba(120, 53, 15, 0.2),
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.8);
+}
+[data-hud-theme='monkeys'] .clay-well {
+  background: rgba(244, 196, 98, 0.78);
+  border-color: rgba(146, 64, 14, 0.28);
+  box-shadow:
+    inset 0 2px 6px rgba(120, 53, 15, 0.18),
+    0 1px 0 rgba(255, 255, 255, 0.55);
+}
+[data-hud-theme='monkeys'] .clay-button {
+  background: linear-gradient(160deg, rgba(254, 245, 200, 0.96) 0%, rgba(252, 218, 130, 0.98) 100%);
+  border-color: rgba(146, 64, 14, 0.36);
+  box-shadow:
+    0 4px 10px -2px rgba(120, 53, 15, 0.22),
+    inset 0 1px 1px rgba(255, 255, 255, 0.85);
+}
+
+/* 5. OTTER THEME (Light Mode — Baby Sky Blue & Aqua Lagoon) */
+[data-hud-theme='otter'] .notch-shell,
+[data-hud-theme='otter'] .clay-slab {
+  background: linear-gradient(160deg, rgba(186, 230, 253, 0.98) 0%, rgba(142, 209, 248, 0.99) 100%);
+  border-color: rgba(3, 105, 161, 0.42);
+  box-shadow:
+    0 14px 28px -6px rgba(12, 74, 110, 0.35),
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.75),
+    inset 0 -2px 4px rgba(7, 89, 133, 0.18);
+}
+[data-hud-theme='otter'] .clay-card {
+  background: linear-gradient(145deg, rgba(208, 238, 254, 0.96) 0%, rgba(168, 221, 250, 0.95) 100%);
+  border-color: rgba(3, 105, 161, 0.32);
+  box-shadow:
+    0 8px 18px -4px rgba(12, 74, 110, 0.2),
+    inset 0 1.5px 1px rgba(255, 255, 255, 0.8);
+}
+[data-hud-theme='otter'] .clay-well {
+  background: rgba(145, 206, 242, 0.78);
+  border-color: rgba(7, 89, 133, 0.28);
+  box-shadow:
+    inset 0 2px 6px rgba(12, 74, 110, 0.18),
+    0 1px 0 rgba(255, 255, 255, 0.55);
+}
+[data-hud-theme='otter'] .clay-button {
+  background: linear-gradient(160deg, rgba(226, 244, 254, 0.96) 0%, rgba(176, 224, 251, 0.98) 100%);
+  border-color: rgba(7, 89, 133, 0.36);
+  box-shadow:
+    0 4px 10px -2px rgba(12, 74, 110, 0.22),
+    inset 0 1px 1px rgba(255, 255, 255, 0.85);
+}
+
+/* Shared Light-Mode Typography & High-Contrast Overrides (Tulip, Monkeys, Otter) */
+[data-hud-theme='flowers'] .clock-3d-text,
+[data-hud-theme='monkeys'] .clock-3d-text,
+[data-hud-theme='otter'] .clock-3d-text {
+  color: #0f172a !important;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.75),
+    0 3px 8px rgba(15, 23, 42, 0.16);
+}
+
+[data-hud-theme='flowers'] .clay-card h1,
+[data-hud-theme='flowers'] .clay-card h2,
+[data-hud-theme='flowers'] .clay-card h3,
+[data-hud-theme='flowers'] .clay-card .text-slate-100,
+[data-hud-theme='flowers'] .clay-card .text-slate-200,
+[data-hud-theme='flowers'] .clay-well .text-slate-100,
+[data-hud-theme='flowers'] .clay-well .text-slate-200,
+[data-hud-theme='flowers'] .clay-well .text-white,
+[data-hud-theme='flowers'] .clay-button.text-white,
+[data-hud-theme='flowers'] .clay-button.text-slate-100,
+[data-hud-theme='flowers'] .clay-button.text-slate-200,
+[data-hud-theme='flowers'] .clay-button.text-slate-300,
+[data-hud-theme='monkeys'] .clay-card h1,
+[data-hud-theme='monkeys'] .clay-card h2,
+[data-hud-theme='monkeys'] .clay-card h3,
+[data-hud-theme='monkeys'] .clay-card .text-slate-100,
+[data-hud-theme='monkeys'] .clay-card .text-slate-200,
+[data-hud-theme='monkeys'] .clay-well .text-slate-100,
+[data-hud-theme='monkeys'] .clay-well .text-slate-200,
+[data-hud-theme='monkeys'] .clay-well .text-white,
+[data-hud-theme='monkeys'] .clay-button.text-white,
+[data-hud-theme='monkeys'] .clay-button.text-slate-100,
+[data-hud-theme='monkeys'] .clay-button.text-slate-200,
+[data-hud-theme='monkeys'] .clay-button.text-slate-300,
+[data-hud-theme='otter'] .clay-card h1,
+[data-hud-theme='otter'] .clay-card h2,
+[data-hud-theme='otter'] .clay-card h3,
+[data-hud-theme='otter'] .clay-card .text-slate-100,
+[data-hud-theme='otter'] .clay-card .text-slate-200,
+[data-hud-theme='otter'] .clay-well .text-slate-100,
+[data-hud-theme='otter'] .clay-well .text-slate-200,
+[data-hud-theme='otter'] .clay-well .text-white,
+[data-hud-theme='otter'] .clay-button.text-white,
+[data-hud-theme='otter'] .clay-button.text-slate-100,
+[data-hud-theme='otter'] .clay-button.text-slate-200,
+[data-hud-theme='otter'] .clay-button.text-slate-300 {
+  color: #0f172a !important;
+}
+
+/* Light-Mode Form Inputs & Selects inside Cards/Wells */
+[data-hud-theme='flowers'] .clay-card select,
+[data-hud-theme='flowers'] .clay-well select,
+[data-hud-theme='flowers'] .clay-well input:not([type='range']),
+[data-hud-theme='monkeys'] .clay-card select,
+[data-hud-theme='monkeys'] .clay-well select,
+[data-hud-theme='monkeys'] .clay-well input:not([type='range']),
+[data-hud-theme='otter'] .clay-card select,
+[data-hud-theme='otter'] .clay-well select,
+[data-hud-theme='otter'] .clay-well input:not([type='range']) {
+  color: #0f172a !important;
+}
+
+[data-hud-theme='flowers'] .clay-well input[class*='bg-slate-900'],
+[data-hud-theme='flowers'] .clay-well select[class*='bg-slate-900'],
+[data-hud-theme='monkeys'] .clay-well input[class*='bg-slate-900'],
+[data-hud-theme='monkeys'] .clay-well select[class*='bg-slate-900'],
+[data-hud-theme='otter'] .clay-well input[class*='bg-slate-900'],
+[data-hud-theme='otter'] .clay-well select[class*='bg-slate-900'] {
+  background-color: rgba(255, 255, 255, 0.88) !important;
+  border-color: rgba(15, 23, 42, 0.2) !important;
+  color: #0f172a !important;
+}
+
+[data-hud-theme='flowers'] .clay-card .text-slate-300,
+[data-hud-theme='flowers'] .clay-card .text-slate-400,
+[data-hud-theme='flowers'] .clay-card .text-slate-500,
+[data-hud-theme='flowers'] .clay-well .text-slate-300,
+[data-hud-theme='flowers'] .clay-well .text-slate-400,
+[data-hud-theme='flowers'] .clay-well .text-slate-500,
+[data-hud-theme='flowers'] .clay-button.text-slate-400,
+[data-hud-theme='flowers'] .clay-button.text-slate-500,
+[data-hud-theme='monkeys'] .clay-card .text-slate-300,
+[data-hud-theme='monkeys'] .clay-card .text-slate-400,
+[data-hud-theme='monkeys'] .clay-card .text-slate-500,
+[data-hud-theme='monkeys'] .clay-well .text-slate-300,
+[data-hud-theme='monkeys'] .clay-well .text-slate-400,
+[data-hud-theme='monkeys'] .clay-well .text-slate-500,
+[data-hud-theme='monkeys'] .clay-button.text-slate-400,
+[data-hud-theme='monkeys'] .clay-button.text-slate-500,
+[data-hud-theme='otter'] .clay-card .text-slate-300,
+[data-hud-theme='otter'] .clay-card .text-slate-400,
+[data-hud-theme='otter'] .clay-card .text-slate-500,
+[data-hud-theme='otter'] .clay-well .text-slate-300,
+[data-hud-theme='otter'] .clay-well .text-slate-400,
+[data-hud-theme='otter'] .clay-well .text-slate-500,
+[data-hud-theme='otter'] .clay-button.text-slate-400,
+[data-hud-theme='otter'] .clay-button.text-slate-500 {
+  color: #334155 !important;
+}
+
+/* Fix light-colored icons & text (-200 and -300) inside wells/cards/buttons in Light Mode */
+[data-hud-theme='flowers'] .clay-well .text-violet-300,
+[data-hud-theme='flowers'] .clay-well .text-violet-200,
+[data-hud-theme='flowers'] .clay-card .text-violet-300,
+[data-hud-theme='flowers'] .clay-card .text-violet-200,
+[data-hud-theme='monkeys'] .clay-well .text-violet-300,
+[data-hud-theme='monkeys'] .clay-well .text-violet-200,
+[data-hud-theme='monkeys'] .clay-card .text-violet-300,
+[data-hud-theme='monkeys'] .clay-card .text-violet-200,
+[data-hud-theme='otter'] .clay-well .text-violet-300,
+[data-hud-theme='otter'] .clay-well .text-violet-200,
+[data-hud-theme='otter'] .clay-card .text-violet-300,
+[data-hud-theme='otter'] .clay-card .text-violet-200 {
+  color: #5b21b6 !important;
+}
+
+[data-hud-theme='flowers'] .clay-well .text-emerald-300,
+[data-hud-theme='flowers'] .clay-well .text-emerald-200,
+[data-hud-theme='flowers'] .clay-card .text-emerald-300,
+[data-hud-theme='flowers'] .clay-card .text-emerald-200,
+[data-hud-theme='monkeys'] .clay-well .text-emerald-300,
+[data-hud-theme='monkeys'] .clay-well .text-emerald-200,
+[data-hud-theme='monkeys'] .clay-card .text-emerald-300,
+[data-hud-theme='monkeys'] .clay-card .text-emerald-200,
+[data-hud-theme='otter'] .clay-well .text-emerald-300,
+[data-hud-theme='otter'] .clay-well .text-emerald-200,
+[data-hud-theme='otter'] .clay-card .text-emerald-300,
+[data-hud-theme='otter'] .clay-card .text-emerald-200 {
+  color: #065f46 !important;
+}
+
+[data-hud-theme='flowers'] .clay-card .text-pink-300,
+[data-hud-theme='flowers'] .clay-card .text-pink-200,
+[data-hud-theme='monkeys'] .clay-card .text-pink-300,
+[data-hud-theme='monkeys'] .clay-card .text-pink-200,
+[data-hud-theme='otter'] .clay-card .text-pink-300,
+[data-hud-theme='otter'] .clay-card .text-pink-200,
+[data-hud-theme='flowers'] .clay-card .text-rose-300,
+[data-hud-theme='flowers'] .clay-card .text-rose-200,
+[data-hud-theme='monkeys'] .clay-card .text-rose-300,
+[data-hud-theme='monkeys'] .clay-card .text-rose-200,
+[data-hud-theme='otter'] .clay-card .text-rose-300,
+[data-hud-theme='otter'] .clay-card .text-rose-200 {
+  color: #be123c !important;
+}
+
+[data-hud-theme='flowers'] .clay-card .text-amber-300,
+[data-hud-theme='flowers'] .clay-card .text-amber-200,
+[data-hud-theme='monkeys'] .clay-card .text-amber-300,
+[data-hud-theme='monkeys'] .clay-card .text-amber-200,
+[data-hud-theme='otter'] .clay-card .text-amber-300,
+[data-hud-theme='otter'] .clay-card .text-amber-200 {
+  color: #92400e !important;
+}
+
+[data-hud-theme='flowers'] .clay-card .text-sky-300,
+[data-hud-theme='flowers'] .clay-card .text-sky-200,
+[data-hud-theme='monkeys'] .clay-card .text-sky-300,
+[data-hud-theme='monkeys'] .clay-card .text-sky-200,
+[data-hud-theme='otter'] .clay-card .text-sky-300,
+[data-hud-theme='otter'] .clay-card .text-sky-200,
+[data-hud-theme='flowers'] .clay-card .text-cyan-300,
+[data-hud-theme='flowers'] .clay-card .text-cyan-200,
+[data-hud-theme='monkeys'] .clay-card .text-cyan-300,
+[data-hud-theme='monkeys'] .clay-card .text-cyan-200,
+[data-hud-theme='otter'] .clay-card .text-cyan-300,
+[data-hud-theme='otter'] .clay-card .text-cyan-200,
+[data-hud-theme='flowers'] .clay-well .text-cyan-300,
+[data-hud-theme='monkeys'] .clay-well .text-cyan-300,
+[data-hud-theme='otter'] .clay-well .text-cyan-300,
+[data-hud-theme='flowers'] .clay-well .text-cyan-200,
+[data-hud-theme='monkeys'] .clay-well .text-cyan-200,
+[data-hud-theme='otter'] .clay-well .text-cyan-200 {
+  color: #075985 !important;
+}
+
+[data-hud-theme='flowers'] .clay-button.text-cyan-300,
+[data-hud-theme='flowers'] .clay-button.text-cyan-200,
+[data-hud-theme='monkeys'] .clay-button.text-cyan-300,
+[data-hud-theme='monkeys'] .clay-button.text-cyan-200,
+[data-hud-theme='otter'] .clay-button.text-cyan-300,
+[data-hud-theme='otter'] .clay-button.text-cyan-200 {
+  color: #075985 !important;
+}
+[data-hud-theme='flowers'] .clay-button.text-emerald-300,
+[data-hud-theme='flowers'] .clay-button.text-emerald-200,
+[data-hud-theme='monkeys'] .clay-button.text-emerald-300,
+[data-hud-theme='monkeys'] .clay-button.text-emerald-200,
+[data-hud-theme='otter'] .clay-button.text-emerald-300,
+[data-hud-theme='otter'] .clay-button.text-emerald-200 {
+  color: #065f46 !important;
+}
+[data-hud-theme='flowers'] .clay-button.text-violet-300,
+[data-hud-theme='flowers'] .clay-button.text-violet-200,
+[data-hud-theme='monkeys'] .clay-button.text-violet-300,
+[data-hud-theme='monkeys'] .clay-button.text-violet-200,
+[data-hud-theme='otter'] .clay-button.text-violet-300,
+[data-hud-theme='otter'] .clay-button.text-violet-200 {
+  color: #5b21b6 !important;
+}
+[data-hud-theme='flowers'] .clay-button.text-blue-300,
+[data-hud-theme='flowers'] .clay-button.text-blue-200,
+[data-hud-theme='monkeys'] .clay-button.text-blue-300,
+[data-hud-theme='monkeys'] .clay-button.text-blue-200,
+[data-hud-theme='otter'] .clay-button.text-blue-300,
+[data-hud-theme='otter'] .clay-button.text-blue-200 {
+  color: #1e40af !important;
+}
+[data-hud-theme='flowers'] .clay-button.text-amber-300,
+[data-hud-theme='flowers'] .clay-button.text-amber-200,
+[data-hud-theme='monkeys'] .clay-button.text-amber-300,
+[data-hud-theme='monkeys'] .clay-button.text-amber-200,
+[data-hud-theme='otter'] .clay-button.text-amber-300,
+[data-hud-theme='otter'] .clay-button.text-amber-200 {
+  color: #92400e !important;
+}
+[data-hud-theme='flowers'] .clay-button.text-sky-300,
+[data-hud-theme='flowers'] .clay-button.text-sky-200,
+[data-hud-theme='monkeys'] .clay-button.text-sky-300,
+[data-hud-theme='monkeys'] .clay-button.text-sky-200,
+[data-hud-theme='otter'] .clay-button.text-sky-300,
+[data-hud-theme='otter'] .clay-button.text-sky-200 {
+  color: #075985 !important;
+}
+
+/* QuickAdd Modal (.clay-slab) inputs & selects in Light Mode */
+[data-hud-theme='flowers'] .clay-slab input.text-white,
+[data-hud-theme='monkeys'] .clay-slab input.text-white,
+[data-hud-theme='otter'] .clay-slab input.text-white {
+  color: #0f172a !important;
+}
+[data-hud-theme='flowers'] .clay-slab select[class*='bg-slate-900'],
+[data-hud-theme='monkeys'] .clay-slab select[class*='bg-slate-900'],
+[data-hud-theme='otter'] .clay-slab select[class*='bg-slate-900'] {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(15, 23, 42, 0.2) !important;
+  color: #0f172a !important;
+}
+
+[data-hud-theme='flowers'] .notch-shell .font-mono.text-white,
+[data-hud-theme='monkeys'] .notch-shell .font-mono.text-white,
+[data-hud-theme='otter'] .notch-shell .font-mono.text-white {
+  color: #0f172a;
+}
+
+[data-hud-theme='flowers'] .clay-card > h2.text-white,
+[data-hud-theme='monkeys'] .clay-card > h2.text-white,
+[data-hud-theme='otter'] .clay-card > h2.text-white,
+[data-hud-theme='flowers'] .clay-card > div > h2.text-white,
+[data-hud-theme='monkeys'] .clay-card > div > h2.text-white,
+[data-hud-theme='otter'] .clay-card > div > h2.text-white {
+  color: #0f172a !important;
+}
