@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChronoSlab — Your day, always on top</title>
+  <meta name="description" content="ChronoSlab is a calm, always-on-top time-block HUD for Windows. Plan your day, track focus, and map projects as flowcharts." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #07090e;
+      --slab-a: rgba(28, 34, 48, 0.92);
+      --slab-b: rgba(17, 21, 31, 0.96);
+      --card-a: rgba(35, 43, 60, 0.78);
+      --card-b: rgba(22, 27, 39, 0.86);
+      --well: rgba(11, 14, 21, 0.72);
+      --line: rgba(255, 255, 255, 0.1);
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.35);
+      --blue: #4f7df3;
+      --green: #38a832;
+      --coral: #fb2c56;
+      --purple: #852df7;
+      --amber: #e5a91a;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    a { color: inherit; text-decoration: none; }
+
+    /* Soft ambient glow behind everything */
+    .ambient {
+      position: fixed; inset: 0; pointer-events: none; z-index: -1;
+      background:
+        radial-gradient(600px 400px at 20% 10%, rgba(79, 125, 243, 0.14), transparent 70%),
+        radial-gradient(500px 380px at 85% 30%, rgba(133, 45, 247, 0.12), transparent 70%),
+        radial-gradient(700px 500px at 50% 100%, var(--accent-glow), transparent 70%);
+      opacity: 0.9;
+      transition: background 0.6s var(--ease);
+    }
+
+    /* Clay surfaces (same language as the app) */
+    .slab {
+      background: linear-gradient(145deg, var(--slab-a), var(--slab-b));
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      box-shadow:
+        0 12px 26px -6px rgba(0, 0, 0, 0.48),
+        0 4px 12px -2px rgba(0, 0, 0, 0.32),
+        inset 0 1.5px 1.5px rgba(255, 255, 255, 0.18),
+        inset 0 -3px 6px rgba(0, 0, 0, 0.5);
+    }
+    .card {
+      background: linear-gradient(150deg, var(--card-a), var(--card-b));
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      box-shadow:
+        0 10px 22px -6px rgba(0, 0, 0, 0.6),
+        inset 0 1.5px 1px rgba(255, 255, 255, 0.15),
+        inset 0 -2.5px 4px rgba(0, 0, 0, 0.45);
+      transition: transform 0.38s var(--ease), border-color 0.32s var(--ease);
+    }
+    .well {
+      background: var(--well);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.75), 0 1px 0 rgba(255, 255, 255, 0.07);
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 14px 22px; border-radius: 16px;
+      font-weight: 700; font-size: 15px;
+      background: linear-gradient(160deg, rgba(44, 53, 74, 0.9), rgba(27, 33, 47, 0.95));
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.55), inset 0 1.5px 1px rgba(255, 255, 255, 0.2), inset 0 -2px 3px rgba(0, 0, 0, 0.5);
+      transition: transform 0.28s var(--ease), box-shadow 0.28s var(--ease), border-color 0.28s var(--ease);
+      cursor: pointer;
+    }
+    .btn:hover { transform: translateY(-1px); border-color: rgba(255, 255, 255, 0.24); }
+    .btn:active { transform: translateY(1px) scale(0.99); }
+    .btn-primary {
+      background: linear-gradient(180deg, #5683f5, #4672e6);
+      border-color: rgba(255, 255, 255, 0.25);
+      box-shadow: 0 12px 26px -6px rgba(79, 125, 243, 0.55), inset 0 2px 1.5px rgba(255, 255, 255, 0.35), inset 0 -3px 4px rgba(0, 0, 0, 0.3);
+    }
+    .btn small { font-weight: 500; opacity: 0.75; font-size: 12px; }
+
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+    /* Nav */
+    nav { position: sticky; top: 14px; z-index: 20; margin-top: 14px; }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 12px 10px 18px; border-radius: 20px;
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -0.02em; }
+    .brand-dot {
+      width: 26px; height: 26px; border-radius: 9px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      box-shadow: 0 4px 12px rgba(79, 125, 243, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+    }
+    .nav-links { display: flex; gap: 6px; align-items: center; }
+    .nav-links a.link {
+      padding: 8px 12px; border-radius: 12px; font-size: 14px; color: var(--muted); font-weight: 600;
+      transition: color 0.25s var(--ease), background 0.25s var(--ease);
+    }
+    .nav-links a.link:hover { color: var(--text); background: rgba(255, 255, 255, 0.05); }
+    .nav-links .btn { padding: 9px 14px; font-size: 13px; border-radius: 12px; }
+
+    /* Hero */
+    .hero { padding: 90px 0 60px; display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px; align-items: center; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 700;
+      color: var(--accent); letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .eyebrow .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 50% { opacity: 0.4; } }
+    h1 {
+      font-size: clamp(40px, 5.4vw, 64px); line-height: 1.04; letter-spacing: -0.035em;
+      font-weight: 800; margin: 20px 0 18px;
+    }
+    h1 .grad {
+      background: linear-gradient(90deg, #7aa2ff, #c084fc 55%, #fb7185);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .lead { font-size: 18px; color: var(--muted); max-width: 30em; }
+    .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+    .meta { margin-top: 16px; font-size: 13px; color: #64748b; }
+
+    /* HUD preview */
+    .stage { display: flex; justify-content: center; }
+    .hud {
+      width: 100%; max-width: 400px; border-radius: 30px; padding: 16px;
+      display: flex; flex-direction: column; gap: 12px;
+      animation: float 7s ease-in-out infinite;
+    }
+    @keyframes float { 50% { transform: translateY(-8px); } }
+    .hud-bar { display: flex; align-items: center; justify-content: space-between; padding: 7px 9px; border-radius: 16px; }
+    .chips { display: flex; gap: 5px; }
+    .chip { font-size: 10px; font-weight: 700; padding: 5px 9px; border-radius: 11px; }
+    .chip.violet { color: #c4b5fd; }
+    .chip.green { color: #6ee7b7; }
+    .icons { display: flex; gap: 5px; }
+    .icons span { width: 24px; height: 24px; border-radius: 10px; }
+    .clock-card { border-radius: 18px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden; }
+    .clock-card .glow { position: absolute; width: 170px; height: 170px; border-radius: 50%; top: -60px; left: -40px; filter: blur(50px); opacity: 0.35; transition: background 0.6s var(--ease); }
+    .date { font-size: 11px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #cbd5e1; }
+    .time { font-size: 38px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; text-shadow: 0 2px 0 rgba(15, 23, 42, 0.9), 0 6px 16px rgba(0, 0, 0, 0.6); }
+    .ampm { font-size: 12px; font-weight: 700; margin-left: 4px; transition: color 0.6s var(--ease); }
+    .ring { width: 78px; height: 78px; border-radius: 50%; padding: 4px; position: relative; display: grid; place-items: center; }
+    .ring svg { position: absolute; inset: 4px; transform: rotate(-90deg); }
+    .ring circle { transition: stroke 0.6s var(--ease), stroke-dashoffset 0.8s var(--ease); }
+    .ring b { font-size: 12px; z-index: 1; }
+    .now-slab {
+      border-radius: 18px; padding: 14px; display: flex; flex-direction: column; gap: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      transition: background 0.6s var(--ease), box-shadow 0.6s var(--ease);
+    }
+    .now-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .now-title { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
+    .pill-dark { background: rgba(0, 0, 0, 0.25); padding: 3px 8px; border-radius: 9px; font-size: 12px; font-weight: 800; }
+    .task { display: flex; align-items: center; gap: 8px; padding: 7px 11px; border-radius: 12px; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.15); font-size: 12px; font-weight: 600; }
+    .task i { width: 14px; height: 14px; border-radius: 5px; border: 2px solid rgba(255, 255, 255, 0.8); }
+    .bar { height: 8px; border-radius: 99px; background: rgba(0, 0, 0, 0.3); padding: 2px; }
+    .bar div { height: 100%; border-radius: 99px; background: #fff; box-shadow: 0 0 10px rgba(255, 255, 255, 0.9); transition: width 0.8s var(--ease); }
+    .tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 4px; border-radius: 16px; }
+    .tabs span { text-align: center; font-size: 11px; font-weight: 600; color: var(--muted); padding: 6px 0; border-radius: 11px; }
+    .tabs span.on { color: #fff; }
+
+    /* Sections */
+    section { padding: 80px 0; }
+    .sec-head { text-align: center; max-width: 620px; margin: 0 auto 44px; }
+    .sec-head h2 { font-size: clamp(28px, 3.6vw, 40px); letter-spacing: -0.03em; line-height: 1.1; font-weight: 800; margin-bottom: 12px; }
+    .sec-head p { color: var(--muted); font-size: 16px; }
+
+    .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .feature { border-radius: 22px; padding: 22px; }
+    .feature:hover { transform: translateY(-3px); border-color: rgba(255, 255, 255, 0.18); }
+    .f-icon { width: 40px; height: 40px; border-radius: 13px; display: grid; place-items: center; margin-bottom: 16px; }
+    .f-icon svg { width: 20px; height: 20px; }
+    .feature h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.01em; }
+    .feature p { font-size: 14px; color: var(--muted); }
+
+    /* Timeline strip */
+    .strip { border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 8px; max-width: 520px; margin: 0 auto; }
+    .row { display: flex; gap: 8px; align-items: stretch; }
+    .rail { width: 64px; border-radius: 16px 6px 6px 16px; padding: 6px 8px; text-align: right; font-size: 10px; display: flex; flex-direction: column; justify-content: space-between; color: #cbd5e1; }
+    .rail em { font-style: normal; color: #64748b; font-size: 9px; }
+    .blk { flex: 1; border-radius: 16px; padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; box-shadow: inset 0 1.5px 1px rgba(255, 255, 255, 0.28), inset 0 -2px 3px rgba(0, 0, 0, 0.25); }
+    .blk span { font-size: 10px; background: rgba(0, 0, 0, 0.2); padding: 3px 8px; border-radius: 8px; }
+
+    /* Themes */
+    .theme-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 760px; margin: 0 auto; }
+    .tgroup { border-radius: 22px; padding: 18px; }
+    .tgroup h4 { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #64748b; margin-bottom: 12px; font-family: 'JetBrains Mono', monospace; }
+    .tlist { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .tbtn {
+      border-radius: 14px; padding: 12px 8px; text-align: center; font-size: 13px; font-weight: 700;
+      cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.1); color: #e2e8f0;
+      transition: transform 0.28s var(--ease), box-shadow 0.28s var(--ease), border-color 0.28s var(--ease);
+    }
+    .tbtn .sw { display: block; height: 34px; border-radius: 10px; margin-bottom: 8px; box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25); }
+    .tbtn:hover { transform: translateY(-2px); }
+    .tbtn.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); }
+    .theme-note { text-align: center; color: #64748b; font-size: 13px; margin-top: 16px; }
+
+    /* Download */
+    .download { border-radius: 30px; padding: 48px; text-align: center; position: relative; overflow: hidden; }
+    .download::before {
+      content: ''; position: absolute; inset: -40% -10% auto; height: 300px;
+      background: radial-gradient(closest-side, rgba(79, 125, 243, 0.28), transparent);
+      pointer-events: none;
+    }
+    .download h2 { font-size: clamp(28px, 3.6vw, 40px); letter-spacing: -0.03em; font-weight: 800; position: relative; }
+    .download p { color: var(--muted); margin: 10px auto 28px; max-width: 32em; position: relative; }
+    .dl-row { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; position: relative; }
+    .reqs { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 26px; position: relative; }
+    .reqs span { font-size: 12px; color: #94a3b8; padding: 6px 12px; border-radius: 999px; }
+    .keys { display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; margin-top: 34px; position: relative; font-size: 13px; color: var(--muted); }
+    kbd { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 3px 7px; border-radius: 7px; margin: 0 2px; color: #e2e8f0; }
+
+    footer { padding: 40px 0 60px; text-align: center; color: #475569; font-size: 13px; }
+
+    /* Reveal on scroll */
+    .reveal { opacity: 0; transform: translateY(14px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
+    .reveal.in { opacity: 1; transform: none; }
+
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; padding-top: 60px; text-align: center; }
+      .lead { margin: 0 auto; }
+      .cta { justify-content: center; }
+      .features { grid-template-columns: 1fr 1fr; }
+      .theme-groups { grid-template-columns: 1fr; }
+      .nav-links a.link { display: none; }
+    }
+    @media (max-width: 560px) {
+      .features { grid-template-columns: 1fr; }
+      .download { padding: 32px 20px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; }
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient"></div>
+
+  <nav class="wrap">
+    <div class="nav-inner slab">
+      <a href="#" class="brand"><span class="brand-dot"></span>ChronoSlab</a>
+      <div class="nav-links">
+        <a class="link" href="#features">Features</a>
+        <a class="link" href="#themes">Themes</a>
+        <a class="link" href="https://github.com/shafayaligit/chornoslab" target="_blank" rel="noopener">GitHub</a>
+        <a class="btn btn-primary" href="#download">Download</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="wrap hero">
+    <div>
+      <span class="eyebrow well"><span class="pulse"></span>Free for Windows</span>
+      <h1>Your day,<br /><span class="grad">always on top.</span></h1>
+      <p class="lead">ChronoSlab is a calm little HUD that sits in the notch of your screen. Glance at what you should be doing right now, then get back to it.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="downloads/ChronoSlab-Setup-x64.exe" download>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+          Download for Windows <small>3.9 MB</small>
+        </a>
+        <a class="btn" href="https://github.com/shafayaligit/chornoslab" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          View on GitHub
+        </a>
+      </div>
+      <p class="meta">Windows 10 &amp; 11 · 64-bit · v0.1.1 (OTA Auto-Updates)</p>
+    </div>
+
+    <div class="stage">
+      <div class="hud slab" id="hud">
+        <div class="hud-bar well">
+          <div class="chips">
+            <span class="chip violet card">Notch</span>
+            <span class="chip green card">Live</span>
+          </div>
+          <div class="icons"><span class="card"></span><span class="card"></span><span class="card"></span><span class="card"></span></div>
+        </div>
+
+        <div class="clock-card card">
+          <div class="glow" id="glow"></div>
+          <div style="position:relative">
+            <div class="date" id="date">SAT, NOV 7</div>
+            <div><span class="time mono" id="time">07:32</span><span class="ampm mono" id="ampm">PM</span></div>
+          </div>
+          <div class="ring well">
+            <svg viewBox="0 0 70 70"><circle cx="35" cy="35" r="29" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="6"/><circle id="ringArc" cx="35" cy="35" r="29" fill="none" stroke="#4f7df3" stroke-width="6" stroke-linecap="round" stroke-dasharray="182.2" stroke-dashoffset="120"/></svg>
+            <b class="mono" id="pct">34%</b>
+          </div>
+        </div>
+
+        <div class="now-slab" id="nowSlab">
+          <div class="now-row">
+            <span class="now-title" id="nowTitle">Deep Work</span>
+            <span class="pill-dark mono" id="nowLeft">42m</span>
+          </div>
+          <div class="task"><i></i><span id="nowTask">Ship the onboarding flow</span></div>
+          <div class="bar"><div id="nowBar" style="width:34%"></div></div>
+        </div>
+
+        <div class="tabs well">
+          <span class="on card">HUD</span><span>Timeline</span><span>Tasks</span><span>Flow</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section id="features" class="wrap">
+    <div class="sec-head reveal">
+      <h2>Small on screen. Big on focus.</h2>
+      <p>Everything you need to stay on track, folded into a glanceable slab that never gets in the way.</p>
+    </div>
+
+    <div class="features">
+      <div class="feature card reveal">
+        <div class="f-icon" style="background:rgba(79,125,243,.18);color:#93b4ff"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="6" rx="3"/><path d="M8 14h8M10 18h4"/></svg></div>
+        <h3>Multi-Edge Docking & Snapping</h3>
+        <p>Snap anywhere along the top, bottom, left, or right edges. Auto-rotates into a sleek vertical pill when docked to screen sides.</p>
+      </div>
+      <div class="feature card reveal">
+        <div class="f-icon" style="background:rgba(56,168,50,.18);color:#86efac"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></div>
+        <h3>Time Blocks & Projects</h3>
+        <p>Lay out your day in color. Map big multi-step projects as visual flowcharts and drop ready steps directly onto your day.</p>
+      </div>
+      <div class="feature card reveal">
+        <div class="f-icon" style="background:rgba(56,189,248,.16);color:#7dd3fc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+        <h3>Over-The-Air Auto Updates</h3>
+        <p>Seamless GitHub-backed updates. ChronoSlab automatically checks for new releases and updates quietly in the background.</p>
+      </div>
+      <div class="feature card reveal">
+        <div class="f-icon" style="background:rgba(133,45,247,.18);color:#d8b4fe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+        <h3>Tasks That Follow You</h3>
+        <p>Pin actionable micro-tasks to any time block. Your next step stays prominently visible on the HUD while you work.</p>
+      </div>
+      <div class="feature card reveal">
+        <div class="f-icon" style="background:rgba(229,169,26,.18);color:#fcd34d"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg></div>
+        <h3>Gentle Check-ins</h3>
+        <p>A soft nudge asks if you are still on task, quietly builds your daily focus streak, and keeps you anchored to your intentions.</p>
+      </div>
+      <div class="feature card reveal">
+        <div class="f-icon" style="background:rgba(251,44,86,.16);color:#fda4af"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 10h.01M15 10h.01"/><path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 3 2.5-3 2.5 3 2.5-3 3 3V10a8 8 0 0 0-8-8z"/></svg></div>
+        <h3>Ghost Mode</h3>
+        <p>Make the HUD completely click-through so it floats over fullscreen games or IDEs, with a 1-click icon to instantly wake it up.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <div class="sec-head reveal">
+      <h2>See the whole day at a glance.</h2>
+      <p>Your timeline stacks up in bold, readable colour so you always know what is next.</p>
+    </div>
+    <div class="strip slab reveal">
+      <div class="row"><div class="rail well mono"><b>9 am</b>10:30<em>90m</em></div><div class="blk" style="background:linear-gradient(180deg,#5683f5,#4672e6)">Deep Work <span class="mono">→ 10:30</span></div></div>
+      <div class="row"><div class="rail well mono"><b>10:30</b>11:15<em>45m</em></div><div class="blk" style="background:linear-gradient(180deg,#40b23a,#32992c)">Walk &amp; Reset <span class="mono">→ 11:15</span></div></div>
+      <div class="row"><div class="rail well mono"><b>11:15</b>12:30<em>75m</em></div><div class="blk" style="background:linear-gradient(180deg,#fc3860,#eb214a)">Design Review <span class="mono">→ 12:30</span></div></div>
+      <div class="row"><div class="rail well mono"><b>1 pm</b>2 pm<em>60m</em></div><div class="blk" style="background:linear-gradient(180deg,#8e3bf8,#7822e6)">Study Session <span class="mono">→ 2 pm</span></div></div>
+      <div class="row"><div class="rail well mono"><b>2 pm</b>2:30<em>30m</em></div><div class="blk" style="background:linear-gradient(180deg,#ebb124,#d89c12)">Inbox &amp; Sync <span class="mono">→ 2:30</span></div></div>
+    </div>
+  </section>
+
+  <section id="themes" class="wrap">
+    <div class="sec-head reveal">
+      <h2>Six themes. Pick your mood.</h2>
+      <p>Three deep dark themes and three soft light ones, each with its own little illustration.</p>
+    </div>
+    <div class="theme-groups reveal">
+      <div class="tgroup slab">
+        <h4>Dark mode</h4>
+        <div class="tlist">
+          <div class="tbtn card active" data-accent="#38bdf8" data-glow="rgba(56,189,248,.35)"><span class="sw" style="background:linear-gradient(135deg,#243044,#0f1522)"></span>Neutral</div>
+          <div class="tbtn card" data-accent="#a78bfa" data-glow="rgba(167,139,250,.35)"><span class="sw" style="background:linear-gradient(135deg,#3a2a7a,#150e30)"></span>Space</div>
+          <div class="tbtn card" data-accent="#fbbf24" data-glow="rgba(251,191,36,.35)"><span class="sw" style="background:linear-gradient(135deg,#6a422e,#26160f)"></span>Cats</div>
+        </div>
+      </div>
+      <div class="tgroup slab">
+        <h4>Light mode</h4>
+        <div class="tlist">
+          <div class="tbtn card" data-accent="#f472b6" data-glow="rgba(244,114,182,.35)"><span class="sw" style="background:linear-gradient(135deg,#ffe4ef,#f9b8d2)"></span>Tulip</div>
+          <div class="tbtn card" data-accent="#f59e0b" data-glow="rgba(245,158,11,.35)"><span class="sw" style="background:linear-gradient(135deg,#fef3c7,#f5d27a)"></span>Monkeys</div>
+          <div class="tbtn card" data-accent="#0ea5e9" data-glow="rgba(14,165,233,.35)"><span class="sw" style="background:linear-gradient(135deg,#e2f4fe,#a7dcf8)"></span>Otter</div>
+        </div>
+      </div>
+    </div>
+    <p class="theme-note">Tap a theme to tint this page.</p>
+  </section>
+
+  <section id="download" class="wrap">
+    <div class="download slab reveal">
+      <h2>Get ChronoSlab</h2>
+      <p>Free, lightweight, and ready in seconds. No account needed. Your schedule stays on your computer.</p>
+      <div class="dl-row">
+        <a class="btn btn-primary" href="downloads/ChronoSlab-Setup-x64.exe" download>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+          Installer (.exe) <small>3.9 MB</small>
+        </a>
+        <a class="btn" href="downloads/ChronoSlab-Setup-x64.msi" download>
+          MSI package (.msi) <small>5.6 MB</small>
+        </a>
+        <a class="btn" href="downloads/ChronoSlab-Portable.zip" download>
+          Portable (.zip) <small>5.3 MB</small>
+        </a>
+        <a class="btn" href="https://github.com/shafayaligit/chornoslab/releases" target="_blank" rel="noopener">
+          GitHub Releases &rarr;
+        </a>
+      </div>
+      <div class="smartscreen-box well" style="margin-top: 18px; padding: 14px 18px; border-radius: 14px; text-align: left; font-size: 13px; line-height: 1.5; color: var(--muted); border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(11, 14, 21, 0.65);">
+        <strong style="color: var(--text); display: block; margin-bottom: 4px;">🛡️ Running for the first time?</strong>
+        If Windows SmartScreen appears (<span style="color: #6ee7b7;">"Windows protected your PC"</span>), click <strong style="color: var(--text);">More info</strong> &rarr; <strong style="color: var(--text);">Run anyway</strong>. ChronoSlab is a clean, 100% offline desktop HUD with zero ads or tracking.
+      </div>
+      <div class="reqs">
+        <span class="well">Windows 10 / 11</span>
+        <span class="well">64-bit</span>
+        <span class="well">Version 0.1.1 (OTA Auto-Update)</span>
+      </div>
+      <div class="keys">
+        <span><kbd class="well">Alt</kbd>+<kbd class="well">T</kbd> quick task</span>
+        <span><kbd class="well">Alt</kbd>+<kbd class="well">B</kbd> quick block</span>
+        <span><kbd class="well">Alt</kbd>+<kbd class="well">C</kbd> focus check-in</span>
+        <span><kbd class="well">Ctrl</kbd>+<kbd class="well">Shift</kbd>+<kbd class="well">G</kbd> ghost mode</span>
+      </div>
+    </div>
+  </section>
+
+  <footer class="wrap">
+    ChronoSlab · Made for calm, focused days · <a href="https://github.com/shafayaligit/chornoslab" target="_blank" rel="noopener" style="text-decoration: underline; color: inherit;">Open Source on GitHub</a>
+  </footer>
+
+  <script>
+    // Live clock + rotating "current block" in the hero HUD
+    const blocks = [
+      { title: 'Deep Work', task: 'Ship the onboarding flow', bg: 'linear-gradient(180deg,#5683f5,#4672e6)', hex: '#4f7df3', glow: 'rgba(79,125,243,.45)' },
+      { title: 'Design Review', task: 'Polish the light themes', bg: 'linear-gradient(180deg,#fc3860,#eb214a)', hex: '#fb2c56', glow: 'rgba(251,44,86,.45)' },
+      { title: 'Study Session', task: 'Chapter 4 problem set', bg: 'linear-gradient(180deg,#8e3bf8,#7822e6)', hex: '#852df7', glow: 'rgba(133,45,247,.45)' },
+      { title: 'Walk & Reset', task: '20 minutes outside', bg: 'linear-gradient(180deg,#40b23a,#32992c)', hex: '#38a832', glow: 'rgba(56,168,50,.45)' },
+    ];
+    let bi = 0, pct = 34;
+    const $ = (id) => document.getElementById(id);
+
+    function paintBlock() {
+      const b = blocks[bi];
+      $('nowSlab').style.background = b.bg;
+      $('nowSlab').style.boxShadow = `0 14px 30px -6px ${b.glow}, inset 0 2px 1.5px rgba(255,255,255,.35), inset 0 -3px 4px rgba(0,0,0,.3)`;
+      $('nowTitle').textContent = b.title;
+      $('nowTask').textContent = b.task;
+      $('ringArc').style.stroke = b.hex;
+      $('ampm').style.color = b.hex;
+      $('glow').style.background = b.hex;
+    }
+
+    function tick() {
+      const d = new Date();
+      const h = d.getHours() % 12 || 12;
+      $('time').textContent = `${String(h).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+      $('ampm').textContent = d.getHours() >= 12 ? 'PM' : 'AM';
+      $('date').textContent = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    }
+
+    function progress() {
+      pct = pct >= 92 ? 12 : pct + 6;
+      if (pct === 12) { bi = (bi + 1) % blocks.length; paintBlock(); }
+      $('pct').textContent = pct + '%';
+      $('nowBar').style.width = pct + '%';
+      $('nowLeft').textContent = Math.max(3, Math.round((100 - pct) * 0.6)) + 'm';
+      $('ringArc').style.strokeDashoffset = 182.2 - (pct / 100) * 182.2;
+    }
+
+    paintBlock(); tick(); progress();
+    setInterval(tick, 1000);
+    setInterval(progress, 2200);
+
+    // Theme chips tint the page accent
+    document.querySelectorAll('.tbtn').forEach((el) => {
+      el.addEventListener('click', () => {
+        document.querySelectorAll('.tbtn').forEach((t) => t.classList.remove('active'));
+        el.classList.add('active');
+        document.documentElement.style.setProperty('--accent', el.dataset.accent);
+        document.documentElement.style.setProperty('--accent-glow', el.dataset.glow);
+      });
+    });
+
+    // Soft reveal on scroll
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach((el, i) => {
+      el.style.transitionDelay = (i % 3) * 70 + 'ms';
+      io.observe(el);
+    });
+  </script>
+</body>
+</html>
