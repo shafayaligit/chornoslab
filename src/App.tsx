@@ -199,6 +199,7 @@ export const App: React.FC = () => {
           dockMode: loaded.windowConfig.dockMode || 'notch',
           alwaysOnTop: loaded.windowConfig.alwaysOnTop ?? true,
           isGhostMode: false,
+          showDesktopBackdropPreview: false,
         },
       });
       if (loaded.windowConfig.alwaysOnTop !== undefined) {
@@ -1463,8 +1464,6 @@ export const App: React.FC = () => {
       className={`relative w-screen h-screen overflow-hidden select-none transition-colors duration-500 ${
         !isRunningInTauri()
           ? 'bg-gradient-to-br from-[#0c101c] via-[#070a12] to-[#04060a]'
-          : windowConfig.showDesktopBackdropPreview
-          ? 'bg-[#07090e]'
           : 'bg-transparent'
       }`}
     >

@@ -469,7 +469,7 @@ export function createInitialSeedState(): HudPersistedState {
       drawerMode: 'calendar',
       isometric3D: false,
       soundEnabled: true,
-      showDesktopBackdropPreview: true,
+      showDesktopBackdropPreview: false,
     },
     blocks: [
       {
