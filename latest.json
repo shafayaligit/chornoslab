@@ -1,11 +1,19 @@
-﻿{
-    "version":  "0.1.3",
-    "notes":  "ChronoSlab 3D HUD v0.1.3: Clean corner magnetic snapping (pills touch screen corners perfectly), and background OTA auto-updates.",
-    "pub_date":  "2026-11-09T13:23:22Z",
-    "platforms":  {
-                      "windows-x86_64":  {
-                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSWVMxTjRHd2V5K2owak51bTVIcFVKWG1zQ2RsS1YxUEZDakFwaEtYZHErMmlsQ0lYQkdBblN4MmdsS3MyUGlDMUhaaFZaTFZoVmdZa3BjckVQMWhJNEFaSlNKUEVwY3dzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk0MjE2MTI2CWZpbGU6Q2hyb25vU2xhYiAzRCBIVURfMC4xLjNfeDY0LXNldHVwLmV4ZQowbXNZaFhtaDdoNjN6T1FGelBuWDhWajRQazE4Y0lWLzFTNjYzK2E0Njl2Mk85SFRTcFZUSFpxeUVmZjFkc0J5ZVE5QU1xRHRXNzJXMlc3ckNJQnBCZz09Cg==",
-                                             "url":  "https://github.com/shafayaligit/chornoslab/releases/download/v0.1.3/ChronoSlab.3D.HUD_0.1.3_x64-setup.exe"
-                                         }
-                  }
+{
+  "version": "0.1.4",
+  "notes": "Automated release for ChronoSlab 3D HUD v0.1.4 with Over-The-Air updates.",
+  "pub_date": "2026-11-10T08:16:33.378Z",
+  "platforms": {
+    "windows-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSWVMxTjRHd2V5K2kwOTNDME15YVRFaHM2aVA3N3h5ZzBvRk82WE1rRmIyRXh4TWFZMWh1MzRCYXZjL1FmNkpKU0c2SksyakhiYkhvbGRiZG4rc3RoR21jMmhWTStKemdFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk0Mjk4NTg3CWZpbGU6Q2hyb25vU2xhYiAzRCBIVURfMC4xLjRfeDY0X2VuLVVTLm1zaQpqM3FncGhMTFZLTjBuQ2lFSXAzRGxkVGc3VjJQL2w3RGx2cTlUTDZBVndsUUFGbGJZaUJRUlR6RFVUYWtiR3lZVHN6L0ZpT1BrL0RKSSs4amFNNWREdz09Cg==",
+      "url": "https://github.com/shafayaligit/chornoslab/releases/download/v0.1.4/ChronoSlab.3D.HUD_0.1.4_x64_en-US.msi"
+    },
+    "windows-x86_64-msi": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSWVMxTjRHd2V5K2kwOTNDME15YVRFaHM2aVA3N3h5ZzBvRk82WE1rRmIyRXh4TWFZMWh1MzRCYXZjL1FmNkpKU0c2SksyakhiYkhvbGRiZG4rc3RoR21jMmhWTStKemdFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk0Mjk4NTg3CWZpbGU6Q2hyb25vU2xhYiAzRCBIVURfMC4xLjRfeDY0X2VuLVVTLm1zaQpqM3FncGhMTFZLTjBuQ2lFSXAzRGxkVGc3VjJQL2w3RGx2cTlUTDZBVndsUUFGbGJZaUJRUlR6RFVUYWtiR3lZVHN6L0ZpT1BrL0RKSSs4amFNNWREdz09Cg==",
+      "url": "https://github.com/shafayaligit/chornoslab/releases/download/v0.1.4/ChronoSlab.3D.HUD_0.1.4_x64_en-US.msi"
+    },
+    "windows-x86_64-nsis": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSWVMxTjRHd2V5K3Q3WXZmK2loSTluR2ZzU3g4WUNmN21VZHY0THRsMS9YcVBkVUJwT1B5b0IwWHJRRGN6NEwrOGdocXREM0RUNW1xVGc3Ym1aVWRnTDQ4QzBGbnVEQlE0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk0Mjk4NTg3CWZpbGU6Q2hyb25vU2xhYiAzRCBIVURfMC4xLjRfeDY0LXNldHVwLmV4ZQpsdTI1clZ6dWwraThVaFA0M1p3NWU5TkVuR3d4U0U3Nnp3YklNcmFzZmxjUUpFTkV3Q0ptQzAxSTJLN3R0QjRuZXV2N29nQWhhdFNwQm0rQjB6d1BBZz09Cg==",
+      "url": "https://github.com/shafayaligit/chornoslab/releases/download/v0.1.4/ChronoSlab.3D.HUD_0.1.4_x64-setup.exe"
+    }
+  }
 }
