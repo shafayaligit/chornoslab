@@ -393,19 +393,19 @@ export const App: React.FC = () => {
           ratio = coordY / totalH;
         }
 
-        // Magnetic corner snapping: when within 110px of screen corners, snap flush (0.0 or 1.0)
+        // Magnetic corner snapping: when within 140px of screen corners, snap flush (0.0 or 1.0)
         if (targetEdge === 'top' || targetEdge === 'bottom') {
-          if (coordX < 110) {
+          if (coordX < 140) {
             ratio = 0.0;
-          } else if (totalW - coordX < 110) {
+          } else if (totalW - coordX < 140) {
             ratio = 1.0;
           } else {
             ratio = Math.max(0.0, Math.min(1.0, ratio));
           }
         } else {
-          if (coordY < 110) {
+          if (coordY < 140) {
             ratio = 0.0;
-          } else if (totalH - coordY < 110) {
+          } else if (totalH - coordY < 140) {
             ratio = 1.0;
           } else {
             ratio = Math.max(0.0, Math.min(1.0, ratio));
@@ -1377,19 +1377,19 @@ export const App: React.FC = () => {
   const isLeftCorner: boolean =
     !isFloatingMode &&
     (currentDockEdge === 'top' || currentDockEdge === 'bottom') &&
-    currentDockOffsetRatio <= 0.15;
+    currentDockOffsetRatio <= 0.20;
   const isRightCorner: boolean =
     !isFloatingMode &&
     (currentDockEdge === 'top' || currentDockEdge === 'bottom') &&
-    currentDockOffsetRatio >= 0.85;
+    currentDockOffsetRatio >= 0.80;
   const isTopCorner: boolean =
     !isFloatingMode &&
     (currentDockEdge === 'left' || currentDockEdge === 'right') &&
-    currentDockOffsetRatio <= 0.15;
+    currentDockOffsetRatio <= 0.20;
   const isBottomCorner: boolean =
     !isFloatingMode &&
     (currentDockEdge === 'left' || currentDockEdge === 'right') &&
-    currentDockOffsetRatio >= 0.85;
+    currentDockOffsetRatio >= 0.80;
 
   const isCornerStart: boolean = isLeftCorner || isTopCorner;
   const isVerticalEdge =
@@ -1747,14 +1747,14 @@ export const App: React.FC = () => {
                           : isRightCorner
                           ? 'rounded-tl-[24px] rounded-tr-none rounded-br-none rounded-bl-[24px]'
                           : 'rounded-[22px]'
-                      } mb-1.5 px-4 py-2 cursor-pointer border-t-2`
+                      } ${isLeftCorner || isRightCorner ? 'mb-0' : 'mb-1.5'} px-4 py-2 cursor-pointer border-t-2`
                     : `notch-shell ${
                         isLeftCorner
                           ? 'rounded-br-[24px] rounded-bl-none rounded-tl-none rounded-tr-[24px]'
                           : isRightCorner
                           ? 'rounded-bl-[24px] rounded-br-none rounded-tr-none rounded-tl-[24px]'
                           : 'rounded-b-[24px]'
-                      } px-4 py-2 cursor-pointer border-b-2`
+                      } ${isLeftCorner || isRightCorner ? 'mt-0' : ''} px-4 py-2 cursor-pointer border-b-2`
                 } animate-soft-panel flex items-center justify-between gap-3.5 min-w-[310px] max-w-[460px] group`}
               >
                 {/* Left: Drag Handle (shifts to right if in left corner) + Current State Pill */}
@@ -1901,7 +1901,7 @@ export const App: React.FC = () => {
                         : isRightCorner
                         ? 'rounded-tl-[32px] rounded-tr-none rounded-br-none rounded-bl-[20px]'
                         : 'rounded-t-[32px] rounded-b-[20px]'
-                    } mb-1.5 p-4`
+                    } ${isLeftCorner || isRightCorner ? 'mb-0' : 'mb-1.5'} p-4`
                   : currentDockEdge === 'left'
                   ? `notch-shell rounded-r-[32px] ${
                       isTopCorner ? 'rounded-tl-none' : isBottomCorner ? 'rounded-bl-none' : ''
@@ -1916,7 +1916,7 @@ export const App: React.FC = () => {
                         : isRightCorner
                         ? 'rounded-bl-[32px] rounded-br-none rounded-tr-none rounded-tl-none'
                         : 'rounded-b-[32px]'
-                    } p-4`
+                    } ${isLeftCorner || isRightCorner ? 'mt-0' : ''} p-4`
               } animate-soft-panel flex flex-col gap-3 max-h-[calc(100vh-16px)] overflow-y-auto ${
                 !hasCompletedOnboarding
                   ? 'w-[92vw] max-w-[370px]'

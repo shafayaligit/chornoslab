@@ -10,7 +10,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use tauri::{
     menu::{Menu, MenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
-    AppHandle, LogicalSize, Manager, PhysicalPosition, Size, WebviewWindow,
+    AppHandle, LogicalPosition, LogicalSize, Manager, Position, Size, WebviewWindow,
 };
 
 const AUTOSTART_REG_KEY: &str = r"HKCU\Software\Microsoft\Windows\CurrentVersion\Run";
@@ -158,77 +158,84 @@ fn position_window_at_edge(
         let screen_pos = monitor.position();
         let scale = monitor.scale_factor();
 
-        let mon_w = (screen_size.width as f64 / scale) as i32;
-        let mon_h = (screen_size.height as f64 / scale) as i32;
-        let w = win_w as i32;
-        let h = win_h as i32;
+        let mon_x = (screen_pos.x as f64 / scale).round() as i32;
+        let mon_y = (screen_pos.y as f64 / scale).round() as i32;
+        let mon_w = (screen_size.width as f64 / scale).round() as i32;
+        let mon_h = (screen_size.height as f64 / scale).round() as i32;
+        let taskbar_h = get_taskbar_height(scale);
+
+        let w = (win_w as i32).min(mon_w);
+        let h = (win_h as i32).min((mon_h - taskbar_h).max(100));
 
         let ratio = offset_ratio.max(0.0).min(1.0);
-        let taskbar_h = get_taskbar_height(scale);
+        let is_corner = ratio <= 0.15 || ratio >= 0.85;
 
         let (mut x, mut y) = match edge {
             "bottom" => {
                 let x_pos = if ratio <= 0.15 {
-                    screen_pos.x
+                    mon_x
                 } else if ratio >= 0.85 {
-                    screen_pos.x + mon_w - w
+                    mon_x + mon_w - w
                 } else {
-                    screen_pos.x + ((mon_w - w) as f64 * ratio) as i32
+                    mon_x + (((mon_w - w) as f64) * ratio).round() as i32
                 };
-                // Position directly above the Windows taskbar with a clean 4px clearance
-                let y_pos = screen_pos.y + mon_h - h - taskbar_h - 4;
+                let clearance = if is_corner { 0 } else { 2 };
+                let y_pos = mon_y + mon_h - h - taskbar_h - clearance;
                 (x_pos, y_pos)
             }
             "left" => {
-                let x_pos = screen_pos.x;
-                let available_h = mon_h - h - taskbar_h - 4;
+                let x_pos = mon_x;
+                let available_h = (mon_h - h - taskbar_h).max(0);
                 let y_pos = if ratio <= 0.15 {
-                    screen_pos.y
+                    mon_y
                 } else if ratio >= 0.85 {
-                    screen_pos.y + available_h
+                    mon_y + available_h
                 } else {
-                    screen_pos.y + (available_h as f64 * ratio) as i32
+                    mon_y + ((available_h as f64) * ratio).round() as i32
                 };
                 (x_pos, y_pos)
             }
             "right" => {
-                let x_pos = screen_pos.x + mon_w - w;
-                let available_h = mon_h - h - taskbar_h - 4;
+                let x_pos = mon_x + mon_w - w;
+                let available_h = (mon_h - h - taskbar_h).max(0);
                 let y_pos = if ratio <= 0.15 {
-                    screen_pos.y
+                    mon_y
                 } else if ratio >= 0.85 {
-                    screen_pos.y + available_h
+                    mon_y + available_h
                 } else {
-                    screen_pos.y + (available_h as f64 * ratio) as i32
+                    mon_y + ((available_h as f64) * ratio).round() as i32
                 };
                 (x_pos, y_pos)
             }
             _ => {
                 // "top" (default)
                 let x_pos = if ratio <= 0.15 {
-                    screen_pos.x
+                    mon_x
                 } else if ratio >= 0.85 {
-                    screen_pos.x + mon_w - w
+                    mon_x + mon_w - w
                 } else {
-                    screen_pos.x + ((mon_w - w) as f64 * ratio) as i32
+                    mon_x + (((mon_w - w) as f64) * ratio).round() as i32
                 };
-                let y_pos = screen_pos.y;
+                let y_pos = mon_y;
                 (x_pos, y_pos)
             }
         };
 
+        let min_x = mon_x;
+        let max_x = (mon_x + mon_w - w).max(min_x);
+        x = x.clamp(min_x, max_x);
+
+        let min_y = mon_y;
         let max_y = match edge {
-            "bottom" => screen_pos.y + mon_h - h - taskbar_h,
-            _ => screen_pos.y + mon_h - h,
+            "bottom" => (mon_y + mon_h - h - taskbar_h).max(min_y),
+            _ => (mon_y + mon_h - h).max(min_y),
         };
+        y = y.clamp(min_y, max_y);
 
-        x = x.max(screen_pos.x).min(screen_pos.x + mon_w - w);
-        y = y.max(screen_pos.y).min(max_y);
-
-        let _ = window.set_position(PhysicalPosition::new(
-            (x as f64 * scale) as i32,
-            (y as f64 * scale) as i32,
-        ));
+        let _ = window.set_position(Position::Logical(LogicalPosition::new(
+            x as f64,
+            y as f64,
+        )));
     }
 }
 
@@ -260,7 +267,21 @@ fn sync_window_bounds(
     let offset_ratio = dock_offset_ratio.unwrap_or(0.5).max(0.0).min(1.0);
     let is_vertical = edge == "left" || edge == "right";
 
-    let (target_w, target_h) = if !expanded {
+    let (mon_w, mon_h, taskbar_h) = if let Ok(Some(monitor)) = window.current_monitor() {
+        let size = monitor.size();
+        let scale = monitor.scale_factor();
+        let mon_w = (size.width as f64 / scale).round();
+        let mon_h = (size.height as f64 / scale).round();
+        let tb = get_taskbar_height(scale) as f64;
+        (mon_w, mon_h, tb)
+    } else {
+        (1920.0, 1080.0, 48.0)
+    };
+
+    let max_allowed_w = (mon_w - 16.0).max(320.0);
+    let max_allowed_h = (mon_h - taskbar_h - 16.0).max(240.0);
+
+    let (mut target_w, mut target_h): (f64, f64) = if !expanded {
         if is_vertical {
             (84.0, 480.0)
         } else {
@@ -281,6 +302,9 @@ fn sync_window_bounds(
             (480.0, 520.0)
         }
     };
+
+    target_w = target_w.min(max_allowed_w);
+    target_h = target_h.min(max_allowed_h);
 
     let _ = window.set_shadow(false);
     let _ = window.set_size(Size::Logical(LogicalSize::new(target_w, target_h)));

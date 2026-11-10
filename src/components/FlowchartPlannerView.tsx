@@ -899,7 +899,7 @@ build --> ship`
     (windowConfig.dockOffsetRatio ?? 0.5) < 0.28;
 
   return (
-    <div className="flex flex-col gap-2 w-full h-[735px] select-none relative">
+    <div className="flex flex-col gap-2 w-full h-[calc(100vh-32px)] min-h-[380px] max-h-[735px] select-none relative">
       {/* 1. CLEAN UNCLUTTERED PROJECT & NAVIGATION BAR */}
       <div
         onMouseDown={onStartDrag}
