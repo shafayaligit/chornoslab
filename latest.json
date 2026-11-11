@@ -1,19 +1,19 @@
 {
-  "version": "0.1.4",
-  "notes": "Automated release for ChronoSlab 3D HUD v0.1.4 with Over-The-Air updates.",
-  "pub_date": "2026-11-10T08:16:33.378Z",
+  "version": "0.1.5",
+  "notes": "Automated release for ChronoSlab 3D HUD v0.1.5 with Over-The-Air updates.",
+  "pub_date": "2026-11-11T09:19:41.288Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSWVMxTjRHd2V5K2kwOTNDME15YVRFaHM2aVA3N3h5ZzBvRk82WE1rRmIyRXh4TWFZMWh1MzRCYXZjL1FmNkpKU0c2SksyakhiYkhvbGRiZG4rc3RoR21jMmhWTStKemdFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk0Mjk4NTg3CWZpbGU6Q2hyb25vU2xhYiAzRCBIVURfMC4xLjRfeDY0X2VuLVVTLm1zaQpqM3FncGhMTFZLTjBuQ2lFSXAzRGxkVGc3VjJQL2w3RGx2cTlUTDZBVndsUUFGbGJZaUJRUlR6RFVUYWtiR3lZVHN6L0ZpT1BrL0RKSSs4amFNNWREdz09Cg==",
-      "url": "https://github.com/shafayaligit/chornoslab/releases/download/v0.1.4/ChronoSlab.3D.HUD_0.1.4_x64_en-US.msi"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSWVMxTjRHd2V5K2gxblh5emZ6UnRCMUtpeU5kN0N3MVhianptSWt2MnRSZVd2UnhDbDVBTTgyUjRNOWlTSTZLT2ZraGVGYjZRMWt4UURla0lHVktmd3BpdFJ0amE1ZUFNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk0Mzg4Nzc3CWZpbGU6Q2hyb25vU2xhYiAzRCBIVURfMC4xLjVfeDY0X2VuLVVTLm1zaQpFWEdJRkFNVkVFeUwzSDczQ1ZyOUtXTWJOemdmK2VOc0VqT1NLOVZQZWlEeHVCU2ZGbmViOWFCd25OYmJUcWd3RGRyTllNR2dKSTVUZ05HMGI0N1dDZz09Cg==",
+      "url": "https://github.com/shafayaligit/chornoslab/releases/download/v0.1.5/ChronoSlab.3D.HUD_0.1.5_x64_en-US.msi"
     },
     "windows-x86_64-msi": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSWVMxTjRHd2V5K2kwOTNDME15YVRFaHM2aVA3N3h5ZzBvRk82WE1rRmIyRXh4TWFZMWh1MzRCYXZjL1FmNkpKU0c2SksyakhiYkhvbGRiZG4rc3RoR21jMmhWTStKemdFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk0Mjk4NTg3CWZpbGU6Q2hyb25vU2xhYiAzRCBIVURfMC4xLjRfeDY0X2VuLVVTLm1zaQpqM3FncGhMTFZLTjBuQ2lFSXAzRGxkVGc3VjJQL2w3RGx2cTlUTDZBVndsUUFGbGJZaUJRUlR6RFVUYWtiR3lZVHN6L0ZpT1BrL0RKSSs4amFNNWREdz09Cg==",
-      "url": "https://github.com/shafayaligit/chornoslab/releases/download/v0.1.4/ChronoSlab.3D.HUD_0.1.4_x64_en-US.msi"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSWVMxTjRHd2V5K2gxblh5emZ6UnRCMUtpeU5kN0N3MVhianptSWt2MnRSZVd2UnhDbDVBTTgyUjRNOWlTSTZLT2ZraGVGYjZRMWt4UURla0lHVktmd3BpdFJ0amE1ZUFNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk0Mzg4Nzc3CWZpbGU6Q2hyb25vU2xhYiAzRCBIVURfMC4xLjVfeDY0X2VuLVVTLm1zaQpFWEdJRkFNVkVFeUwzSDczQ1ZyOUtXTWJOemdmK2VOc0VqT1NLOVZQZWlEeHVCU2ZGbmViOWFCd25OYmJUcWd3RGRyTllNR2dKSTVUZ05HMGI0N1dDZz09Cg==",
+      "url": "https://github.com/shafayaligit/chornoslab/releases/download/v0.1.5/ChronoSlab.3D.HUD_0.1.5_x64_en-US.msi"
     },
     "windows-x86_64-nsis": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSWVMxTjRHd2V5K3Q3WXZmK2loSTluR2ZzU3g4WUNmN21VZHY0THRsMS9YcVBkVUJwT1B5b0IwWHJRRGN6NEwrOGdocXREM0RUNW1xVGc3Ym1aVWRnTDQ4QzBGbnVEQlE0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk0Mjk4NTg3CWZpbGU6Q2hyb25vU2xhYiAzRCBIVURfMC4xLjRfeDY0LXNldHVwLmV4ZQpsdTI1clZ6dWwraThVaFA0M1p3NWU5TkVuR3d4U0U3Nnp3YklNcmFzZmxjUUpFTkV3Q0ptQzAxSTJLN3R0QjRuZXV2N29nQWhhdFNwQm0rQjB6d1BBZz09Cg==",
-      "url": "https://github.com/shafayaligit/chornoslab/releases/download/v0.1.4/ChronoSlab.3D.HUD_0.1.4_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSWVMxTjRHd2V5K2tzK2Y2bTgwREx2Ny9jUHdQRURpNXd4MkxTdXFHeXNkdUtRL3VwOTg4RVNWRVRsZTl0bFQrZlNjVFJsQWtZRzI5eEtJRWZpcDlqc01WTkdOU092QXc4PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk0Mzg4Nzc3CWZpbGU6Q2hyb25vU2xhYiAzRCBIVURfMC4xLjVfeDY0LXNldHVwLmV4ZQplM2xPc3Vta0FHVUM5MnFZVDBNR3FHTTZEWk5scWVGMXk2ZWxvT3NTRzZFd2FaVG9ySVVpTURkb1NwU2pFSGFVSzJPRE5vN212QVh1cmdnVzRObDNBUT09Cg==",
+      "url": "https://github.com/shafayaligit/chornoslab/releases/download/v0.1.5/ChronoSlab.3D.HUD_0.1.5_x64-setup.exe"
     }
   }
 }
