@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
   GitBranch,
+  SlidersHorizontal,
 } from 'lucide-react';
 import {
   BlockCategory,
@@ -46,6 +47,9 @@ const FULL_DAY_NAMES = [
   'Saturday',
 ];
 
+const SHORT_DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAY_LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
 function formatBlockRailTime(totalMinutes: number): string {
   const clamped = ((totalMinutes % 1440) + 1440) % 1440;
   const h24 = Math.floor(clamped / 60);
@@ -77,13 +81,15 @@ export const TimelineCalendarDrawer: React.FC<TimelineCalendarDrawerProps> = ({
   const [selectedDay, setSelectedDay] = useState<number>(currentDayOfWeek);
   const [editingBlock, setEditingBlock] = useState<TimeBlock | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [editorScreen, setEditorScreen] = useState<'quick' | 'custom'>('quick');
   const [dragOverBlockId, setDragOverBlockId] = useState<string | null>(null);
 
   const [draftTitle, setDraftTitle] = useState('');
   const [draftCategory, setDraftCategory] = useState<BlockCategory>('deep-work');
   const [draftStart, setDraftStart] = useState(540);
   const [draftEnd, setDraftEnd] = useState(600);
-  const [draftRecurrence, setDraftRecurrence] = useState<RecurrencePattern>('daily');
+  const [draftRecurrence, setDraftRecurrence] = useState<RecurrencePattern>('custom');
+  const [draftCustomDays, setDraftCustomDays] = useState<number[]>([selectedDay]);
   const [draftFlowProjectId, setDraftFlowProjectId] = useState<string>('');
   const [draftFlowNodeId, setDraftFlowNodeId] = useState<string>('');
 
@@ -93,8 +99,21 @@ export const TimelineCalendarDrawer: React.FC<TimelineCalendarDrawerProps> = ({
     ? computeFlowProjectProgress(activeFlowProject)
     : null;
 
+  const dayOffset = selectedDay - currentDayOfWeek;
+  const targetDate = new Date(now);
+  targetDate.setDate(now.getDate() + dayOffset);
+  const targetDateStr = `${targetDate.getFullYear()}-${String(
+    targetDate.getMonth() + 1
+  ).padStart(2, '0')}-${String(targetDate.getDate()).padStart(2, '0')}`;
+  const ordinalDateLabel = getOrdinalDay(targetDate.getDate());
+
   const dayBlocks = blocks
-    .filter((b) => b.recurrence.daysOfWeek.includes(selectedDay))
+    .filter((b) => {
+      if (b.recurrence.pattern === 'once' && b.recurrence.specificDate) {
+        return b.recurrence.specificDate === targetDateStr;
+      }
+      return b.recurrence.daysOfWeek.includes(selectedDay);
+    })
     .sort((a, b) => a.startMinutes - b.startMinutes);
 
   const totalScheduledMinutes = dayBlocks.reduce(
@@ -105,11 +124,6 @@ export const TimelineCalendarDrawer: React.FC<TimelineCalendarDrawerProps> = ({
   const totalRemMins = totalScheduledMinutes % 60;
   const totalDurationLabel =
     totalRemMins > 0 ? `${totalHours}h ${totalRemMins}m` : `${totalHours}h`;
-
-  const dayOffset = selectedDay - currentDayOfWeek;
-  const targetDate = new Date(now);
-  targetDate.setDate(now.getDate() + dayOffset);
-  const ordinalDateLabel = getOrdinalDay(targetDate.getDate());
 
   const openCreateEditor = () => {
     const rawNow = now.getHours() * 60 + now.getMinutes();
@@ -123,10 +137,12 @@ export const TimelineCalendarDrawer: React.FC<TimelineCalendarDrawerProps> = ({
     setDraftCategory('deep-work');
     setDraftStart(start);
     setDraftEnd(Math.min(1440, start + 60));
-    setDraftRecurrence('daily');
+    setDraftRecurrence('custom');
+    setDraftCustomDays([selectedDay]);
     setDraftFlowProjectId('');
     setDraftFlowNodeId('');
     setEditingBlock(null);
+    setEditorScreen('quick');
     setIsCreating(true);
   };
 
@@ -136,9 +152,15 @@ export const TimelineCalendarDrawer: React.FC<TimelineCalendarDrawerProps> = ({
     setDraftStart(blk.startMinutes);
     setDraftEnd(blk.endMinutes);
     setDraftRecurrence(blk.recurrence.pattern);
+    setDraftCustomDays(
+      blk.recurrence.daysOfWeek && blk.recurrence.daysOfWeek.length > 0
+        ? blk.recurrence.daysOfWeek
+        : [selectedDay]
+    );
     setDraftFlowProjectId(blk.flowProjectId || '');
     setDraftFlowNodeId(blk.flowNodeId || '');
     setEditingBlock(blk);
+    setEditorScreen('quick');
     setIsCreating(true);
   };
 
@@ -162,17 +184,36 @@ export const TimelineCalendarDrawer: React.FC<TimelineCalendarDrawerProps> = ({
     }
   };
 
-  const handleSaveSlot = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveSlot = (saveType: 'once' | 'repeat-day' | 'custom') => {
     if (!draftTitle.trim()) return;
 
     const validStart = Math.max(0, Math.min(1410, draftStart));
     const validEnd = Math.max(validStart + 15, Math.min(1440, draftEnd));
 
-    let daysOfWeek = [0, 1, 2, 3, 4, 5, 6];
-    if (draftRecurrence === 'weekdays') daysOfWeek = [1, 2, 3, 4, 5];
-    if (draftRecurrence === 'weekends') daysOfWeek = [0, 6];
-    if (draftRecurrence === 'custom') daysOfWeek = [selectedDay];
+    let pattern: RecurrencePattern = 'custom';
+    let daysOfWeek: number[] = [selectedDay];
+    let specificDate: string | undefined = undefined;
+
+    if (saveType === 'once') {
+      pattern = 'once';
+      daysOfWeek = [selectedDay];
+      specificDate = targetDateStr;
+    } else if (saveType === 'repeat-day') {
+      pattern = 'custom';
+      daysOfWeek = [selectedDay];
+    } else {
+      // 'custom' from Screen 2
+      pattern = draftRecurrence;
+      if (pattern === 'daily') {
+        daysOfWeek = [0, 1, 2, 3, 4, 5, 6];
+      } else if (pattern === 'weekdays') {
+        daysOfWeek = [1, 2, 3, 4, 5];
+      } else if (pattern === 'weekends') {
+        daysOfWeek = [0, 6];
+      } else {
+        daysOfWeek = draftCustomDays.length > 0 ? draftCustomDays : [selectedDay];
+      }
+    }
 
     if (editingBlock) {
       onUpdateBlock({
@@ -181,7 +222,7 @@ export const TimelineCalendarDrawer: React.FC<TimelineCalendarDrawerProps> = ({
         category: draftCategory,
         startMinutes: validStart,
         endMinutes: validEnd,
-        recurrence: { pattern: draftRecurrence, daysOfWeek },
+        recurrence: { pattern, daysOfWeek, specificDate },
         flowProjectId: draftFlowProjectId || undefined,
         flowNodeId: draftFlowNodeId || undefined,
       });
@@ -192,7 +233,7 @@ export const TimelineCalendarDrawer: React.FC<TimelineCalendarDrawerProps> = ({
         startMinutes: validStart,
         endMinutes: validEnd,
         bufferMinutes: 5,
-        recurrence: { pattern: draftRecurrence, daysOfWeek },
+        recurrence: { pattern, daysOfWeek, specificDate },
         flowProjectId: draftFlowProjectId || undefined,
         flowNodeId: draftFlowNodeId || undefined,
       });
@@ -216,7 +257,11 @@ export const TimelineCalendarDrawer: React.FC<TimelineCalendarDrawerProps> = ({
   return (
     <div
       className={`clay-card rounded-2xl p-3.5 flex flex-col gap-2.5 overflow-hidden select-none transition-all ${
-        isCreating ? 'min-h-[340px] max-h-[440px]' : 'h-[330px]'
+        isCreating
+          ? editorScreen === 'custom'
+            ? 'min-h-[380px] max-h-[460px]'
+            : 'min-h-[320px] max-h-[420px]'
+          : 'h-[330px]'
       }`}
     >
       {/* Fixed Header inside Card */}
@@ -264,117 +309,274 @@ export const TimelineCalendarDrawer: React.FC<TimelineCalendarDrawerProps> = ({
         }`}
       >
         <div className="overflow-hidden">
-          <form
-            onSubmit={handleSaveSlot}
-            className="clay-well rounded-2xl p-2.5 flex flex-col gap-2 border border-white/15"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-200">
-                {editingBlock ? 'Edit Block' : 'New Block'}
-              </span>
-              <button
-                type="button"
-                onClick={() => setIsCreating(false)}
-                className="text-slate-400 hover:text-white transition-colors"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            <input
-              type="text"
-              value={draftTitle}
-              onChange={(e) => setDraftTitle(e.target.value)}
-              placeholder="Project or subject..."
-              className="w-full px-2.5 py-1 rounded-xl bg-slate-900/90 border border-slate-700/80 text-xs text-white focus:outline-none focus:border-blue-400 select-text"
-            />
-
-            {flowProjects.length > 0 && (
-              <div className="flex items-center gap-1.5">
-                <GitBranch className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                <select
-                  value={
-                    draftFlowProjectId && draftFlowNodeId
-                      ? `${draftFlowProjectId}::${draftFlowNodeId}`
-                      : ''
-                  }
-                  onChange={(e) => handleSelectFlowNodeForBlock(e.target.value)}
-                  className="flex-1 min-w-0 bg-slate-900/90 text-slate-200 border border-slate-700/80 rounded-xl px-2 py-1 text-[10px] truncate focus:outline-none focus:border-cyan-400"
-                >
-                  <option value="">Link Flow Step (optional)...</option>
-                  {activeFlowProject &&
-                    activeFlowProject.nodes
-                      .filter((n) => n.status !== 'done')
-                      .map((n) => {
-                        const isReady = activeFlowProgress?.unlockedNodeIds.has(
-                          n.id
-                        );
-                        return (
-                          <option
-                            key={n.id}
-                            value={`${activeFlowProject.id}::${n.id}`}
-                          >
-                            {isReady ? '⚡ ' : ''}
-                            {n.title}
-                            {n.estimatedMinutes ? ` (${n.estimatedMinutes}m)` : ''}
-                          </option>
-                        );
-                      })}
-                  {flowProjects
-                    .filter((p) => p.id !== activeFlowProject?.id)
-                    .flatMap((p) =>
-                      p.nodes
-                        .filter((n) => n.status !== 'done')
-                        .map((n) => (
-                          <option key={n.id} value={`${p.id}::${n.id}`}>
-                            [{p.name}] {n.title}
-                          </option>
-                        ))
-                    )}
-                </select>
-              </div>
-            )}
-
-            <div className="flex items-center gap-1.5">
-              {(Object.keys(CATEGORY_THEMES) as BlockCategory[]).map((catKey) => {
-                const theme = CATEGORY_THEMES[catKey];
-                const active = draftCategory === catKey;
-                return (
+          <div className="clay-well rounded-2xl p-2.5 flex flex-col gap-2 border border-white/15">
+            {editorScreen === 'quick' ? (
+              /* SCREEN 1: FAST & CLEAN ESSENTIALS */
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-slate-200">
+                    {editingBlock ? 'Edit Block' : 'New Block'}
+                  </span>
                   <button
                     type="button"
-                    key={catKey}
-                    onClick={() => setDraftCategory(catKey)}
-                    style={{ backgroundColor: theme.solidHex }}
-                    className={`h-5 flex-1 rounded-md transition-all duration-300 ${
-                      active
-                        ? 'ring-2 ring-white scale-105'
-                        : 'opacity-70 hover:opacity-100'
-                    }`}
-                    title={theme.label}
-                  />
-                );
-              })}
-            </div>
+                    onClick={() => setIsCreating(false)}
+                    className="text-slate-400 hover:text-white transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
 
-            <TimeRangeSelector
-              startMinutes={draftStart}
-              endMinutes={draftEnd}
-              onChange={(nextStart, nextEnd) => {
-                setDraftStart(nextStart);
-                setDraftEnd(nextEnd);
-              }}
-            />
+                <input
+                  type="text"
+                  autoFocus
+                  value={draftTitle}
+                  onChange={(e) => setDraftTitle(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSaveSlot('repeat-day');
+                    }
+                  }}
+                  placeholder="What are you working on?..."
+                  className="w-full px-2.5 py-1.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-blue-400 select-text"
+                />
 
-            <div className="flex items-center justify-end">
-              <button
-                type="submit"
-                className="clay-button px-2.5 py-1 rounded-xl text-xs font-semibold text-white flex items-center gap-1"
-              >
-                <Check className="w-3 h-3" />
-                <span>Save</span>
-              </button>
-            </div>
-          </form>
+                <TimeRangeSelector
+                  startMinutes={draftStart}
+                  endMinutes={draftEnd}
+                  onChange={(nextStart, nextEnd) => {
+                    setDraftStart(nextStart);
+                    setDraftEnd(nextEnd);
+                  }}
+                />
+
+                {/* The 3 Action Buttons */}
+                <div className="flex items-center gap-1.5 pt-0.5">
+                  <button
+                    type="button"
+                    onClick={() => handleSaveSlot('once')}
+                    className="flex-1 py-1.5 px-2 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-[11px] font-semibold text-slate-200 hover:text-white transition-all text-center"
+                    title={`Schedule strictly once for this ${FULL_DAY_NAMES[selectedDay]}`}
+                  >
+                    Just once
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSaveSlot('repeat-day')}
+                    className="flex-1 py-1.5 px-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-[11px] font-bold text-white shadow-md transition-all text-center flex items-center justify-center gap-1"
+                    title={`Repeat on every ${FULL_DAY_NAMES[selectedDay]}`}
+                  >
+                    <Check className="w-3 h-3" />
+                    <span>Every {SHORT_DAY_NAMES[selectedDay]}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setEditorScreen('custom')}
+                    className="py-1.5 px-2.5 rounded-xl border border-white/10 bg-slate-800/80 hover:bg-slate-700 text-[11px] font-medium text-slate-300 hover:text-white transition-all flex items-center gap-1 shrink-0"
+                    title="More options (repeat days, color, flowchart step)"
+                  >
+                    <span>More...</span>
+                    <ChevronRight className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* SCREEN 2: CUSTOMIZATION & MORE OPTIONS */
+              <div className="flex flex-col gap-2.5">
+                <div className="flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setEditorScreen('quick')}
+                    className="text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-0.5 transition-colors"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                    <span>Back</span>
+                  </button>
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
+                    More Options
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setIsCreating(false)}
+                    className="text-slate-400 hover:text-white transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Repeat Days Selection */}
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      Repeat on Days
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDraftRecurrence('daily');
+                          setDraftCustomDays([0, 1, 2, 3, 4, 5, 6]);
+                        }}
+                        className={`text-[10px] px-2 py-0.5 rounded-lg border transition-all ${
+                          draftRecurrence === 'daily'
+                            ? 'bg-blue-500/25 border-blue-400 text-blue-200 font-bold'
+                            : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        Everyday
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDraftRecurrence('weekdays');
+                          setDraftCustomDays([1, 2, 3, 4, 5]);
+                        }}
+                        className={`text-[10px] px-2 py-0.5 rounded-lg border transition-all ${
+                          draftRecurrence === 'weekdays'
+                            ? 'bg-blue-500/25 border-blue-400 text-blue-200 font-bold'
+                            : 'bg-white/5 border-white/10 text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        Weekdays
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-7 gap-1">
+                    {SHORT_DAY_NAMES.map((dayName, idx) => {
+                      const isSelected = draftCustomDays.includes(idx);
+                      return (
+                        <button
+                          type="button"
+                          key={dayName}
+                          onClick={() => {
+                            setDraftRecurrence('custom');
+                            if (isSelected) {
+                              if (draftCustomDays.length > 1) {
+                                setDraftCustomDays(
+                                  draftCustomDays.filter((d) => d !== idx)
+                                );
+                              }
+                            } else {
+                              setDraftCustomDays(
+                                [...draftCustomDays, idx].sort()
+                              );
+                            }
+                          }}
+                          className={`py-1 rounded-xl text-center text-[10px] font-bold transition-all ${
+                            isSelected
+                              ? 'bg-blue-600 text-white shadow-sm ring-1 ring-blue-400'
+                              : 'bg-slate-900/80 border border-white/10 text-slate-400 hover:text-slate-200'
+                          }`}
+                          title={FULL_DAY_NAMES[idx]}
+                        >
+                          {DAY_LETTERS[idx]}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Color / Category Selection */}
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Category Color
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {(Object.keys(CATEGORY_THEMES) as BlockCategory[]).map(
+                      (catKey) => {
+                        const theme = CATEGORY_THEMES[catKey];
+                        const active = draftCategory === catKey;
+                        return (
+                          <button
+                            type="button"
+                            key={catKey}
+                            onClick={() => setDraftCategory(catKey)}
+                            style={{ backgroundColor: theme.solidHex }}
+                            className={`h-5 flex-1 rounded-md transition-all duration-300 ${
+                              active
+                                ? 'ring-2 ring-white scale-105'
+                                : 'opacity-70 hover:opacity-100'
+                            }`}
+                            title={theme.label}
+                          />
+                        );
+                      }
+                    )}
+                  </div>
+                </div>
+
+                {/* Flow Step Link (Optional) */}
+                {flowProjects.length > 0 && (
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      Link Flow Step (Optional)
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <GitBranch className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                      <select
+                        value={
+                          draftFlowProjectId && draftFlowNodeId
+                            ? `${draftFlowProjectId}::${draftFlowNodeId}`
+                            : ''
+                        }
+                        onChange={(e) =>
+                          handleSelectFlowNodeForBlock(e.target.value)
+                        }
+                        className="flex-1 min-w-0 bg-slate-900/90 text-slate-200 border border-slate-700/80 rounded-xl px-2 py-1 text-[10px] truncate focus:outline-none focus:border-cyan-400"
+                      >
+                        <option value="">None</option>
+                        {activeFlowProject &&
+                          activeFlowProject.nodes
+                            .filter((n) => n.status !== 'done')
+                            .map((n) => {
+                              const isReady =
+                                activeFlowProgress?.unlockedNodeIds.has(n.id);
+                              return (
+                                <option
+                                  key={n.id}
+                                  value={`${activeFlowProject.id}::${n.id}`}
+                                >
+                                  {isReady ? '⚡ ' : ''}
+                                  {n.title}
+                                  {n.estimatedMinutes
+                                    ? ` (${n.estimatedMinutes}m)`
+                                    : ''}
+                                </option>
+                              );
+                            })}
+                        {flowProjects
+                          .filter((p) => p.id !== activeFlowProject?.id)
+                          .flatMap((p) =>
+                            p.nodes
+                              .filter((n) => n.status !== 'done')
+                              .map((n) => (
+                                <option key={n.id} value={`${p.id}::${n.id}`}>
+                                  [{p.name}] {n.title}
+                                </option>
+                              ))
+                          )}
+                      </select>
+                    </div>
+                  </div>
+                )}
+
+                {/* Save Custom Block Button */}
+                <div className="flex items-center justify-end pt-1">
+                  <button
+                    type="button"
+                    onClick={() => handleSaveSlot('custom')}
+                    className="clay-button px-4 py-1.5 rounded-xl text-xs font-bold text-white flex items-center gap-1.5 shadow-md bg-blue-600 hover:bg-blue-500 transition-all"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Save Custom Block</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

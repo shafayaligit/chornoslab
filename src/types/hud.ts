@@ -5,11 +5,12 @@ export type BlockCategory =
   | 'wellness'
   | 'creative';
 
-export type RecurrencePattern = 'daily' | 'weekdays' | 'weekends' | 'custom';
+export type RecurrencePattern = 'once' | 'daily' | 'weekdays' | 'weekends' | 'custom';
 
 export interface RecurrenceRule {
   pattern: RecurrencePattern;
   daysOfWeek: number[];
+  specificDate?: string;
 }
 
 export interface TimeBlock {

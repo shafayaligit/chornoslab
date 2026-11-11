@@ -116,8 +116,8 @@ export const QuickAddCommandModal: React.FC<QuickAddCommandModalProps> = ({
         endMinutes: endMins,
         bufferMinutes: 5,
         recurrence: {
-          pattern: 'daily',
-          daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+          pattern: 'custom',
+          daysOfWeek: [now.getDay()],
         },
         flowProjectId: fProjId || undefined,
         flowNodeId: fNodeId || undefined,

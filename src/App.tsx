@@ -474,9 +474,17 @@ export const App: React.FC = () => {
   const formattedMinutes = String(minutes).padStart(2, '0');
   const amPm = hours24 >= 12 ? 'PM' : 'AM';
   const clockShort = `${formattedHours}:${formattedMinutes} ${amPm}`;
+  const todayDateStr = `${now.getFullYear()}-${String(
+    now.getMonth() + 1
+  ).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
   const todaysBlocks = hudState.blocks
-    .filter((b) => b.recurrence.daysOfWeek.includes(currentDay))
+    .filter((b) => {
+      if (b.recurrence.pattern === 'once' && b.recurrence.specificDate) {
+        return b.recurrence.specificDate === todayDateStr;
+      }
+      return b.recurrence.daysOfWeek.includes(currentDay);
+    })
     .sort((a, b) => a.startMinutes - b.startMinutes);
 
   const activeBlock =
@@ -1057,7 +1065,12 @@ export const App: React.FC = () => {
     durationMins: number
   ): number => {
     const sorted = [...existingBlocks]
-      .filter((b) => b.recurrence.daysOfWeek.includes(currentDay))
+      .filter((b) => {
+        if (b.recurrence.pattern === 'once' && b.recurrence.specificDate) {
+          return b.recurrence.specificDate === todayDateStr;
+        }
+        return b.recurrence.daysOfWeek.includes(currentDay);
+      })
       .sort((a, b) => a.startMinutes - b.startMinutes);
 
     let candidate = Math.max(0, fromMins);
@@ -1093,7 +1106,7 @@ export const App: React.FC = () => {
         startMinutes: slotStart,
         endMinutes: Math.min(1440, slotStart + duration),
         bufferMinutes: 5,
-        recurrence: { pattern: 'daily', daysOfWeek: [0, 1, 2, 3, 4, 5, 6] },
+        recurrence: { pattern: 'custom', daysOfWeek: [currentDay] },
         flowProjectId: project.id,
         flowNodeId: node.id,
       };
@@ -1162,7 +1175,7 @@ export const App: React.FC = () => {
           startMinutes: slotStart,
           endMinutes: slotStart + duration,
           bufferMinutes: 5,
-          recurrence: { pattern: 'daily', daysOfWeek: [0, 1, 2, 3, 4, 5, 6] },
+          recurrence: { pattern: 'custom', daysOfWeek: [currentDay] },
           flowProjectId: project.id,
           flowNodeId: node.id,
         });

@@ -1,7 +1,7 @@
 {
   "name": "timeblock-hud",
   "private": true,
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Minimalist 3D Desktop Productivity Overlay & Time-Block HUD",
   "type": "module",
   "scripts": {
