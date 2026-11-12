@@ -374,7 +374,7 @@ export const TimelineCalendarDrawer: React.FC<TimelineCalendarDrawerProps> = ({
                   <button
                     type="button"
                     onClick={() => setEditorScreen('custom')}
-                    className="py-1.5 px-2.5 rounded-xl border border-white/10 bg-slate-800/80 hover:bg-slate-700 text-[11px] font-medium text-slate-300 hover:text-white transition-all flex items-center gap-1 shrink-0"
+                    className="clay-button py-1.5 px-2.5 rounded-xl text-[11px] font-semibold text-slate-200 hover:text-white transition-all flex items-center gap-1 shrink-0"
                     title="More options (repeat days, color, flowchart step)"
                   >
                     <span>More...</span>
@@ -468,7 +468,7 @@ export const TimelineCalendarDrawer: React.FC<TimelineCalendarDrawerProps> = ({
                           className={`py-1 rounded-xl text-center text-[10px] font-bold transition-all ${
                             isSelected
                               ? 'bg-blue-600 text-white shadow-sm ring-1 ring-blue-400'
-                              : 'bg-slate-900/80 border border-white/10 text-slate-400 hover:text-slate-200'
+                              : 'bg-white/10 hover:bg-white/20 border border-white/15 text-slate-300 hover:text-white'
                           }`}
                           title={FULL_DAY_NAMES[idx]}
                         >

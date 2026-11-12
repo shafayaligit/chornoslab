@@ -717,3 +717,25 @@
 [data-hud-theme='otter'] .clay-card > div > h2.text-white {
   color: #0f172a !important;
 }
+
+/* Keep crisp white text on solid primary blue buttons in Light Mode */
+[data-hud-theme='flowers'] .clay-well .bg-blue-600,
+[data-hud-theme='monkeys'] .clay-well .bg-blue-600,
+[data-hud-theme='otter'] .clay-well .bg-blue-600 {
+  color: #ffffff !important;
+}
+[data-hud-theme='flowers'] .clay-well .bg-blue-600 span,
+[data-hud-theme='monkeys'] .clay-well .bg-blue-600 span,
+[data-hud-theme='otter'] .clay-well .bg-blue-600 span {
+  color: #ffffff !important;
+}
+
+/* Darken light-blue accents inside light wells (e.g., Now button, active Everyday/Weekdays) */
+[data-hud-theme='flowers'] .clay-well .text-blue-300,
+[data-hud-theme='flowers'] .clay-well .text-blue-200,
+[data-hud-theme='monkeys'] .clay-well .text-blue-300,
+[data-hud-theme='monkeys'] .clay-well .text-blue-200,
+[data-hud-theme='otter'] .clay-well .text-blue-300,
+[data-hud-theme='otter'] .clay-well .text-blue-200 {
+  color: #1e40af !important;
+}
